@@ -29,6 +29,21 @@ interface Option {
   name: string;
 }
 
+interface ItineraryItem {
+  day: string;
+  description: string;
+}
+
+interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+interface MapUrl {
+  url: string;
+  iframe: string;
+}
+
 interface TourPackage {
   id: number;
   name: string;
@@ -45,13 +60,13 @@ interface TourPackage {
   min_people?: number;
   max_people?: number;
   overview?: string;
-  card_highlights?: string;
-  detailed_highlights?: string;
-  itinerary?: string;
-  map_url?: string;
-  includes?: string;
-  excludes?: string;
-  faqs?: string;
+  card_highlights?: string[];
+  detailed_highlights?: string[];
+  itinerary?: ItineraryItem[];
+  map_url?: MapUrl;
+  includes?: string[];
+  excludes?: string[];
+  faqs?: FaqItem[];
   status_id?: number;
   status?: Option;
   images?: Image[];
@@ -79,13 +94,13 @@ interface FormState {
   min_people: string;
   max_people: string;
   overview: string;
-  card_highlights: string;
-  detailed_highlights: string;
-  itinerary: string;
-  map_url: string;
-  includes: string;
-  excludes: string;
-  faqs: string;
+  card_highlights: string[];
+  detailed_highlights: string[];
+  itinerary: ItineraryItem[];
+  map_url: MapUrl;
+  includes: string[];
+  excludes: string[];
+  faqs: FaqItem[];
   status_id: number | null;
 }
 
@@ -293,56 +308,102 @@ const TourPackageDetailModal: React.FC<TourPackageDetailModalProps> = ({ tourPac
             </div>
             <div className="mb-6">
               <h3 className="font-semibold text-gray-700 mb-4 text-2xl">Card Highlights</h3>
-              <p className="text-gray-700 whitespace-pre-line text-justify leading-relaxed">
-                {tourPackage.card_highlights ?? "No highlights available"}
-              </p>
+              {tourPackage.card_highlights && tourPackage.card_highlights.length > 0 ? (
+                <ul className="list-disc pl-5 text-gray-700">
+                  {tourPackage.card_highlights.map((highlight, index) => (
+                    <li key={index}>{highlight}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-700">No highlights available</p>
+              )}
             </div>
             <div className="mb-6">
               <h3 className="font-semibold text-gray-700 mb-4 text-2xl">Detailed Highlights</h3>
-              <p className="text-gray-700 whitespace-pre-line text-justify leading-relaxed">
-                {tourPackage.detailed_highlights ?? "No detailed highlights available"}
-              </p>
+              {tourPackage.detailed_highlights && tourPackage.detailed_highlights.length > 0 ? (
+                <ul className="list-disc pl-5 text-gray-700">
+                  {tourPackage.detailed_highlights.map((highlight, index) => (
+                    <li key={index}>{highlight}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-700">No detailed highlights available</p>
+              )}
             </div>
             <div className="mb-6">
               <h3 className="font-semibold text-gray-700 mb-4 text-2xl">Itinerary</h3>
-              <p className="text-gray-700 whitespace-pre-line text-justify leading-relaxed">
-                {tourPackage.itinerary ?? "No itinerary available"}
-              </p>
+              {tourPackage.itinerary && tourPackage.itinerary.length > 0 ? (
+                <ul className="list-disc pl-5 text-gray-700">
+                  {tourPackage.itinerary.map((item, index) => (
+                    <li key={index}>
+                      <strong>{item.day}:</strong> {item.description}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-700">No itinerary available</p>
+              )}
             </div>
             <div className="mb-6">
               <h3 className="font-semibold text-gray-700 mb-4 text-2xl">Map URL</h3>
-              <p className="text-gray-700 whitespace-pre-line text-justify leading-relaxed">
-                {tourPackage.map_url ? (
-                  <a
-                    href={tourPackage.map_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
-                  >
-                    {tourPackage.map_url}
-                  </a>
-                ) : (
-                  "No map available"
-                )}
-              </p>
+              {tourPackage.map_url ? (
+                <div>
+                  {tourPackage.map_url.url && (
+                    <a
+                      href={tourPackage.map_url.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline block"
+                    >
+                      {tourPackage.map_url.url}
+                    </a>
+                  )}
+                  {tourPackage.map_url.iframe && (
+                    <div dangerouslySetInnerHTML={{ __html: tourPackage.map_url.iframe }} />
+                  )}
+                </div>
+              ) : (
+                <p className="text-gray-700">No map available</p>
+              )}
             </div>
             <div className="mb-6">
               <h3 className="font-semibold text-gray-700 mb-4 text-2xl">Includes</h3>
-              <p className="text-gray-700 whitespace-pre-line text-justify leading-relaxed">
-                {tourPackage.includes ?? "No includes available"}
-              </p>
+              {tourPackage.includes && tourPackage.includes.length > 0 ? (
+                <ul className="list-disc pl-5 text-gray-700">
+                  {tourPackage.includes.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-700">No includes available</p>
+              )}
             </div>
             <div className="mb-6">
               <h3 className="font-semibold text-gray-700 mb-4 text-2xl">Excludes</h3>
-              <p className="text-gray-700 whitespace-pre-line text-justify leading-relaxed">
-                {tourPackage.excludes ?? "No excludes available"}
-              </p>
+              {tourPackage.excludes && tourPackage.excludes.length > 0 ? (
+                <ul className="list-disc pl-5 text-gray-700">
+                  {tourPackage.excludes.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-700">No excludes available</p>
+              )}
             </div>
             <div className="mb-6">
               <h3 className="font-semibold text-gray-700 mb-4 text-2xl">FAQs</h3>
-              <p className="text-gray-700 whitespace-pre-line text-justify leading-relaxed">
-                {tourPackage.faqs ?? "No FAQs available"}
-              </p>
+              {tourPackage.faqs && tourPackage.faqs.length > 0 ? (
+                <div>
+                  {tourPackage.faqs.map((faq, index) => (
+                    <div key={index} className="mb-4">
+                      <strong>Q: {faq.question}</strong>
+                      <p>A: {faq.answer}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-700">No FAQs available</p>
+              )}
             </div>
           </div>
         </div>
@@ -378,13 +439,13 @@ const AdminTourPackage: React.FC = () => {
     min_people: "",
     max_people: "",
     overview: "",
-    card_highlights: "",
-    detailed_highlights: "",
-    itinerary: "",
-    map_url: "",
-    includes: "",
-    excludes: "",
-    faqs: "",
+    card_highlights: [],
+    detailed_highlights: [],
+    itinerary: [],
+    map_url: { url: "", iframe: "" },
+    includes: [],
+    excludes: [],
+    faqs: [],
     status_id: null,
   });
   const [images, setImages] = useState<File[]>([]);
@@ -400,6 +461,16 @@ const AdminTourPackage: React.FC = () => {
   const formRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [tourPackagesPerPage] = useState<number>(12);
+
+  // Temp states for adding new items
+  const [newCardHighlight, setNewCardHighlight] = useState("");
+  const [newDetailedHighlight, setNewDetailedHighlight] = useState("");
+  const [newItineraryDay, setNewItineraryDay] = useState("");
+  const [newItineraryDesc, setNewItineraryDesc] = useState("");
+  const [newInclude, setNewInclude] = useState("");
+  const [newExclude, setNewExclude] = useState("");
+  const [newFaqQuestion, setNewFaqQuestion] = useState("");
+  const [newFaqAnswer, setNewFaqAnswer] = useState("");
 
   const fetchTourPackages = async () => {
     setLoading(true);
@@ -492,10 +563,120 @@ const AdminTourPackage: React.FC = () => {
     const { name, value } = e.target;
     if (name === "status_id") {
       setForm((prev) => ({ ...prev, [name]: value ? parseInt(value, 10) : null }));
+    } else if (name.startsWith("map_url.")) {
+      const key = name.split(".")[1] as keyof MapUrl;
+      setForm((prev) => ({
+        ...prev,
+        map_url: { ...prev.map_url, [key]: value },
+      }));
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
     setErrors((prev) => ({ ...prev, [name]: undefined }));
+  };
+
+  const addCardHighlight = () => {
+    if (newCardHighlight.trim()) {
+      setForm((prev) => ({
+        ...prev,
+        card_highlights: [...prev.card_highlights, newCardHighlight.trim()],
+      }));
+      setNewCardHighlight("");
+    }
+  };
+
+  const removeCardHighlight = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      card_highlights: prev.card_highlights.filter((_, i) => i !== index),
+    }));
+  };
+
+  const addDetailedHighlight = () => {
+    if (newDetailedHighlight.trim()) {
+      setForm((prev) => ({
+        ...prev,
+        detailed_highlights: [...prev.detailed_highlights, newDetailedHighlight.trim()],
+      }));
+      setNewDetailedHighlight("");
+    }
+  };
+
+  const removeDetailedHighlight = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      detailed_highlights: prev.detailed_highlights.filter((_, i) => i !== index),
+    }));
+  };
+
+  const addItinerary = () => {
+    if (newItineraryDay.trim() && newItineraryDesc.trim()) {
+      setForm((prev) => ({
+        ...prev,
+        itinerary: [...prev.itinerary, { day: newItineraryDay.trim(), description: newItineraryDesc.trim() }],
+      }));
+      setNewItineraryDay("");
+      setNewItineraryDesc("");
+    }
+  };
+
+  const removeItinerary = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      itinerary: prev.itinerary.filter((_, i) => i !== index),
+    }));
+  };
+
+  const addInclude = () => {
+    if (newInclude.trim()) {
+      setForm((prev) => ({
+        ...prev,
+        includes: [...prev.includes, newInclude.trim()],
+      }));
+      setNewInclude("");
+    }
+  };
+
+  const removeInclude = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      includes: prev.includes.filter((_, i) => i !== index),
+    }));
+  };
+
+  const addExclude = () => {
+    if (newExclude.trim()) {
+      setForm((prev) => ({
+        ...prev,
+        excludes: [...prev.excludes, newExclude.trim()],
+      }));
+      setNewExclude("");
+    }
+  };
+
+  const removeExclude = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      excludes: prev.excludes.filter((_, i) => i !== index),
+    }));
+  };
+
+  const addFaq = () => {
+    if (newFaqQuestion.trim() && newFaqAnswer.trim()) {
+      setForm((prev) => ({
+        ...prev,
+        faqs: [...prev.faqs, { question: newFaqQuestion.trim(), answer: newFaqAnswer.trim() }],
+      }));
+      setNewFaqQuestion("");
+      setNewFaqAnswer("");
+    }
+  };
+
+  const removeFaq = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      faqs: prev.faqs.filter((_, i) => i !== index),
+    }));
   };
 
   const validate = (): boolean => {
@@ -541,7 +722,29 @@ const AdminTourPackage: React.FC = () => {
     setLoading(true);
     const formData = new FormData();
     Object.entries(form).forEach(([key, val]) => {
-      if (val !== null && val !== "") {
+      if (key === "card_highlights") {
+        (val as string[]).forEach((item, idx) => formData.append(`card_highlights[${idx}]`, item));
+      } else if (key === "detailed_highlights") {
+        (val as string[]).forEach((item, idx) => formData.append(`detailed_highlights[${idx}]`, item));
+      } else if (key === "itinerary") {
+        (val as ItineraryItem[]).forEach((item, idx) => {
+          formData.append(`itinerary[${idx}][day]`, item.day);
+          formData.append(`itinerary[${idx}][description]`, item.description);
+        });
+      } else if (key === "map_url") {
+        const map = val as MapUrl;
+        if (map.url) formData.append("map_url[url]", map.url);
+        if (map.iframe) formData.append("map_url[iframe]", map.iframe);
+      } else if (key === "includes") {
+        (val as string[]).forEach((item, idx) => formData.append(`includes[${idx}]`, item));
+      } else if (key === "excludes") {
+        (val as string[]).forEach((item, idx) => formData.append(`excludes[${idx}]`, item));
+      } else if (key === "faqs") {
+        (val as FaqItem[]).forEach((item, idx) => {
+          formData.append(`faqs[${idx}][question]`, item.question);
+          formData.append(`faqs[${idx}][answer]`, item.answer);
+        });
+      } else if (val !== null && val !== "") {
         formData.append(key, val.toString());
       }
     });
@@ -824,13 +1027,13 @@ const AdminTourPackage: React.FC = () => {
       min_people: "",
       max_people: "",
       overview: "",
-      card_highlights: "",
-      detailed_highlights: "",
-      itinerary: "",
-      map_url: "",
-      includes: "",
-      excludes: "",
-      faqs: "",
+      card_highlights: [],
+      detailed_highlights: [],
+      itinerary: [],
+      map_url: { url: "", iframe: "" },
+      includes: [],
+      excludes: [],
+      faqs: [],
       status_id: null,
     });
     setImages([]);
@@ -840,6 +1043,14 @@ const AdminTourPackage: React.FC = () => {
     setFileError("");
     setIsEditing(false);
     setEditingId(null);
+    setNewCardHighlight("");
+    setNewDetailedHighlight("");
+    setNewItineraryDay("");
+    setNewItineraryDesc("");
+    setNewInclude("");
+    setNewExclude("");
+    setNewFaqQuestion("");
+    setNewFaqAnswer("");
   };
 
   const handleEdit = (tourPackage: TourPackage) => {
@@ -858,13 +1069,13 @@ const AdminTourPackage: React.FC = () => {
       min_people: tourPackage.min_people?.toString() ?? "",
       max_people: tourPackage.max_people?.toString() ?? "",
       overview: tourPackage.overview ?? "",
-      card_highlights: tourPackage.card_highlights ?? "",
-      detailed_highlights: tourPackage.detailed_highlights ?? "",
-      itinerary: tourPackage.itinerary ?? "",
-      map_url: tourPackage.map_url ?? "",
-      includes: tourPackage.includes ?? "",
-      excludes: tourPackage.excludes ?? "",
-      faqs: tourPackage.faqs ?? "",
+      card_highlights: tourPackage.card_highlights ?? [],
+      detailed_highlights: tourPackage.detailed_highlights ?? [],
+      itinerary: tourPackage.itinerary ?? [],
+      map_url: tourPackage.map_url ?? { url: "", iframe: "" },
+      includes: tourPackage.includes ?? [],
+      excludes: tourPackage.excludes ?? [],
+      faqs: tourPackage.faqs ?? [],
       status_id: tourPackage.status_id ?? null,
     });
     setExistingImages(tourPackage.images ?? []);
@@ -1344,122 +1555,194 @@ const AdminTourPackage: React.FC = () => {
                     </div>
                     <div className="md:col-span-2 border border-gray-300 rounded-lg p-4 shadow-sm">
                       <label className="block text-sm font-medium text-gray-800 mb-1">
-                        Card Highlights (comma separated)
+                        Card Highlights
                       </label>
-                      <textarea
-                        name="card_highlights"
-                        value={form.card_highlights}
-                        onChange={handleChange}
-                        rows={2}
-                        className={`w-full px-4 py-2 rounded-md border ${
-                          errors.card_highlights ? "border-red-500" : "border-gray-300"
-                        } bg-gray-50 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition`}
-                      />
-                      {errors.card_highlights && (
-                        <p className="text-sm text-red-600 mt-1">{errors.card_highlights}</p>
-                      )}
+                      <div className="flex gap-2 mb-2">
+                        <input
+                          value={newCardHighlight}
+                          onChange={(e) => setNewCardHighlight(e.target.value)}
+                          placeholder="Add highlight"
+                          className="flex-1 px-3 py-2 rounded border border-gray-300"
+                        />
+                        <button type="button" onClick={addCardHighlight} className="bg-blue-500 text-white px-4 py-2 rounded">
+                          Add
+                        </button>
+                      </div>
+                      <ul className="list-disc pl-5">
+                        {form.card_highlights.map((hl, index) => (
+                          <li key={index} className="flex justify-between">
+                            {hl}
+                            <button type="button" onClick={() => removeCardHighlight(index)} className="text-red-500">
+                              Remove
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                     <div className="md:col-span-2 border border-gray-300 rounded-lg p-4 shadow-sm">
                       <label className="block text-sm font-medium text-gray-800 mb-1">
-                        Detailed Highlights (bullet points)
+                        Detailed Highlights
                       </label>
-                      <textarea
-                        name="detailed_highlights"
-                        value={form.detailed_highlights}
-                        onChange={handleChange}
-                        rows={6}
-                        className={`w-full px-4 py-2 rounded-md border ${
-                          errors.detailed_highlights ? "border-red-500" : "border-gray-300"
-                        } bg-gray-50 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition`}
-                      />
-                      {errors.detailed_highlights && (
-                        <p className="text-sm text-red-600 mt-1">{errors.detailed_highlights}</p>
-                      )}
+                      <div className="flex gap-2 mb-2">
+                        <input
+                          value={newDetailedHighlight}
+                          onChange={(e) => setNewDetailedHighlight(e.target.value)}
+                          placeholder="Add detailed highlight"
+                          className="flex-1 px-3 py-2 rounded border border-gray-300"
+                        />
+                        <button type="button" onClick={addDetailedHighlight} className="bg-blue-500 text-white px-4 py-2 rounded">
+                          Add
+                        </button>
+                      </div>
+                      <ul className="list-disc pl-5">
+                        {form.detailed_highlights.map((hl, index) => (
+                          <li key={index} className="flex justify-between">
+                            {hl}
+                            <button type="button" onClick={() => removeDetailedHighlight(index)} className="text-red-500">
+                              Remove
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                     <div className="md:col-span-2 border border-gray-300 rounded-lg p-4 shadow-sm">
                       <label className="block text-sm font-medium text-gray-800 mb-1">
                         Itinerary
                       </label>
-                      <textarea
-                        name="itinerary"
-                        value={form.itinerary}
-                        onChange={handleChange}
-                        rows={6}
-                        className={`w-full px-4 py-2 rounded-md border ${
-                          errors.itinerary ? "border-red-500" : "border-gray-300"
-                        } bg-gray-50 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition`}
-                      />
-                      {errors.itinerary && (
-                        <p className="text-sm text-red-600 mt-1">{errors.itinerary}</p>
-                      )}
+                      <div className="flex gap-2 mb-2">
+                        <input
+                          value={newItineraryDay}
+                          onChange={(e) => setNewItineraryDay(e.target.value)}
+                          placeholder="Day (e.g. Day 1)"
+                          className="w-1/3 px-3 py-2 rounded border border-gray-300"
+                        />
+                        <input
+                          value={newItineraryDesc}
+                          onChange={(e) => setNewItineraryDesc(e.target.value)}
+                          placeholder="Description"
+                          className="flex-1 px-3 py-2 rounded border border-gray-300"
+                        />
+                        <button type="button" onClick={addItinerary} className="bg-blue-500 text-white px-4 py-2 rounded">
+                          Add
+                        </button>
+                      </div>
+                      <ul className="list-disc pl-5">
+                        {form.itinerary.map((item, index) => (
+                          <li key={index} className="flex justify-between">
+                            {item.day}: {item.description}
+                            <button type="button" onClick={() => removeItinerary(index)} className="text-red-500">
+                              Remove
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <div className="border border-gray-300 rounded-lg p-4 shadow-sm">
+                    <div className="md:col-span-2 border border-gray-300 rounded-lg p-4 shadow-sm">
                       <label className="block text-sm font-medium text-gray-800 mb-1">
                         Map URL
                       </label>
                       <input
-                        name="map_url"
-                        value={form.map_url}
+                        name="map_url.url"
+                        value={form.map_url.url}
                         onChange={handleChange}
                         placeholder="https://example.com/map"
-                        className={`w-full px-4 py-2 rounded-md border ${
-                          errors.map_url ? "border-red-500" : "border-gray-300"
-                        } bg-gray-50 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition`}
+                        className={`w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-50 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition mb-2`}
                       />
-                      {errors.map_url && (
-                        <p className="text-sm text-red-600 mt-1">{errors.map_url}</p>
-                      )}
+                      <textarea
+                        name="map_url.iframe"
+                        value={form.map_url.iframe}
+                        onChange={handleChange}
+                        placeholder="<iframe src='...'></iframe>"
+                        rows={3}
+                        className={`w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-50 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition`}
+                      />
                     </div>
                     <div className="md:col-span-2 border border-gray-300 rounded-lg p-4 shadow-sm">
                       <label className="block text-sm font-medium text-gray-800 mb-1">
                         Includes
                       </label>
-                      <textarea
-                        name="includes"
-                        value={form.includes}
-                        onChange={handleChange}
-                        rows={4}
-                        className={`w-full px-4 py-2 rounded-md border ${
-                          errors.includes ? "border-red-500" : "border-gray-300"
-                        } bg-gray-50 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition`}
-                      />
-                      {errors.includes && (
-                        <p className="text-sm text-red-600 mt-1">{errors.includes}</p>
-                      )}
+                      <div className="flex gap-2 mb-2">
+                        <input
+                          value={newInclude}
+                          onChange={(e) => setNewInclude(e.target.value)}
+                          placeholder="Add include item"
+                          className="flex-1 px-3 py-2 rounded border border-gray-300"
+                        />
+                        <button type="button" onClick={addInclude} className="bg-blue-500 text-white px-4 py-2 rounded">
+                          Add
+                        </button>
+                      </div>
+                      <ul className="list-disc pl-5">
+                        {form.includes.map((item, index) => (
+                          <li key={index} className="flex justify-between">
+                            {item}
+                            <button type="button" onClick={() => removeInclude(index)} className="text-red-500">
+                              Remove
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                     <div className="md:col-span-2 border border-gray-300 rounded-lg p-4 shadow-sm">
                       <label className="block text-sm font-medium text-gray-800 mb-1">
                         Excludes
                       </label>
-                      <textarea
-                        name="excludes"
-                        value={form.excludes}
-                        onChange={handleChange}
-                        rows={4}
-                        className={`w-full px-4 py-2 rounded-md border ${
-                          errors.excludes ? "border-red-500" : "border-gray-300"
-                        } bg-gray-50 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition`}
-                      />
-                      {errors.excludes && (
-                        <p className="text-sm text-red-600 mt-1">{errors.excludes}</p>
-                      )}
+                      <div className="flex gap-2 mb-2">
+                        <input
+                          value={newExclude}
+                          onChange={(e) => setNewExclude(e.target.value)}
+                          placeholder="Add exclude item"
+                          className="flex-1 px-3 py-2 rounded border border-gray-300"
+                        />
+                        <button type="button" onClick={addExclude} className="bg-blue-500 text-white px-4 py-2 rounded">
+                          Add
+                        </button>
+                      </div>
+                      <ul className="list-disc pl-5">
+                        {form.excludes.map((item, index) => (
+                          <li key={index} className="flex justify-between">
+                            {item}
+                            <button type="button" onClick={() => removeExclude(index)} className="text-red-500">
+                              Remove
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                     <div className="md:col-span-2 border border-gray-300 rounded-lg p-4 shadow-sm">
                       <label className="block text-sm font-medium text-gray-800 mb-1">
                         FAQs
                       </label>
-                      <textarea
-                        name="faqs"
-                        value={form.faqs}
-                        onChange={handleChange}
-                        rows={6}
-                        className={`w-full px-4 py-2 rounded-md border ${
-                          errors.faqs ? "border-red-500" : "border-gray-300"
-                        } bg-gray-50 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition`}
-                      />
-                      {errors.faqs && (
-                        <p className="text-sm text-red-600 mt-1">{errors.faqs}</p>
-                      )}
+                      <div className="flex gap-2 mb-2">
+                        <input
+                          value={newFaqQuestion}
+                          onChange={(e) => setNewFaqQuestion(e.target.value)}
+                          placeholder="Question"
+                          className="w-1/2 px-3 py-2 rounded border border-gray-300"
+                        />
+                        <input
+                          value={newFaqAnswer}
+                          onChange={(e) => setNewFaqAnswer(e.target.value)}
+                          placeholder="Answer"
+                          className="flex-1 px-3 py-2 rounded border border-gray-300"
+                        />
+                        <button type="button" onClick={addFaq} className="bg-blue-500 text-white px-4 py-2 rounded">
+                          Add
+                        </button>
+                      </div>
+                      <div>
+                        {form.faqs.map((faq, index) => (
+                          <div key={index} className="flex justify-between mb-2">
+                            <div>
+                              <strong>Q:</strong> {faq.question}<br />
+                              <strong>A:</strong> {faq.answer}
+                            </div>
+                            <button type="button" onClick={() => removeFaq(index)} className="text-red-500">
+                              Remove
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                   <div className="mt-6 border border-gray-300 rounded-lg p-5 shadow-sm">

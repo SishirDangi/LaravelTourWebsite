@@ -22,13 +22,13 @@ return new class extends Migration {
             $table->integer('min_people');
             $table->integer('max_people');
             $table->text('overview')->nullable();
-            $table->text('card_highlights')->nullable();
-            $table->text('detailed_highlights')->nullable();
-            $table->text('itinerary')->nullable();
-            $table->string('map_url')->nullable();
-            $table->text('includes')->nullable();
-            $table->text('excludes')->nullable();
-            $table->text('faqs')->nullable();
+            $table->json('card_highlights')->nullable();
+            $table->json('detailed_highlights')->nullable();
+            $table->json('itinerary')->nullable();
+            $table->json('map_url')->nullable(); 
+            $table->json('includes')->nullable();
+            $table->json('excludes')->nullable();
+            $table->json('faqs')->nullable();
             $table->unsignedBigInteger('status_id');
             $table->timestamps();
 

@@ -40,7 +40,13 @@ class TourPackage extends Model
         'min_people' => 'integer',
         'max_people' => 'integer',
         'duration_days' => 'integer',
-        'is_main' => 'boolean',
+        'card_highlights' => 'array', // Cast JSON to array
+        'detailed_highlights' => 'array', // Cast JSON to array
+        'itinerary' => 'array', // Cast JSON to array
+        'map_url' => 'array', // Cast JSON to array for URL and iframe
+        'includes' => 'array', // Cast JSON to array
+        'excludes' => 'array', // Cast JSON to array
+        'faqs' => 'array', // Cast JSON to array
     ];
 
     public function destination()

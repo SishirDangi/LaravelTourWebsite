@@ -12,6 +12,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
+use Stevebauman\Purify\Facades\Purify;
 
 class TourPackageController extends Controller
 {
@@ -47,17 +48,32 @@ class TourPackageController extends Controller
                 'min_people' => 'required|integer|min:1',
                 'max_people' => 'required|integer|min:1',
                 'overview' => 'nullable|string',
-                'card_highlights' => 'nullable|string',
-                'detailed_highlights' => 'nullable|string',
-                'itinerary' => 'nullable|string',
-                'map_url' => 'nullable|string',
-                'includes' => 'nullable|string',
-                'excludes' => 'nullable|string',
-                'faqs' => 'nullable|string',
+                'card_highlights' => 'nullable|array',
+                'card_highlights.*' => 'string',
+                'detailed_highlights' => 'nullable|array',
+                'detailed_highlights.*' => 'string',
+                'itinerary' => 'nullable|array',
+                'itinerary.*.day' => 'required|string|max:255',
+                'itinerary.*.description' => 'required|string',
+                'map_url' => 'nullable|array',
+                'map_url.url' => 'nullable|url',
+                'map_url.iframe' => 'nullable|string',
+                'includes' => 'nullable|array',
+                'includes.*' => 'string',
+                'excludes' => 'nullable|array',
+                'excludes.*' => 'string',
+                'faqs' => 'nullable|array',
+                'faqs.*.question' => 'required|string',
+                'faqs.*.answer' => 'required|string',
                 'images' => 'required|array|min:1',
                 'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:512',
                 'status_id' => 'required|in:4,5',
             ]);
+
+            // Sanitize iframe in map_url if present
+            if (isset($validated['map_url']['iframe'])) {
+                $validated['map_url']['iframe'] = Purify::clean($validated['map_url']['iframe']);
+            }
 
             $images = $validated['images'];
             unset($validated['images']);
@@ -123,19 +139,34 @@ class TourPackageController extends Controller
                 'min_people' => 'sometimes|required|integer|min:1',
                 'max_people' => 'sometimes|required|integer|min:1',
                 'overview' => 'sometimes|nullable|string',
-                'card_highlights' => 'sometimes|nullable|string',
-                'detailed_highlights' => 'sometimes|nullable|string',
-                'itinerary' => 'sometimes|nullable|string',
-                'map_url' => 'sometimes|nullable|string',
-                'includes' => 'sometimes|nullable|string',
-                'excludes' => 'sometimes|nullable|string',
-                'faqs' => 'sometimes|nullable|string',
+                'card_highlights' => 'sometimes|nullable|array',
+                'card_highlights.*' => 'string',
+                'detailed_highlights' => 'sometimes|nullable|array',
+                'detailed_highlights.*' => 'string',
+                'itinerary' => 'sometimes|nullable|array',
+                'itinerary.*.day' => 'required|string|max:255',
+                'itinerary.*.description' => 'required|string',
+                'map_url' => 'sometimes|nullable|array',
+                'map_url.url' => 'nullable|url',
+                'map_url.iframe' => 'nullable|string',
+                'includes' => 'sometimes|nullable|array',
+                'includes.*' => 'string',
+                'excludes' => 'sometimes|nullable|array',
+                'excludes.*' => 'string',
+                'faqs' => 'sometimes|nullable|array',
+                'faqs.*.question' => 'required|string',
+                'faqs.*.answer' => 'required|string',
                 'images' => 'sometimes|array',
                 'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:512',
                 'deleted_images' => 'sometimes|array',
                 'deleted_images.*' => 'integer|exists:tour_package_images,id',
                 'status_id' => 'sometimes|required|in:4,5',
             ]);
+
+            // Sanitize iframe in map_url if present
+            if (isset($validated['map_url']['iframe'])) {
+                $validated['map_url']['iframe'] = Purify::clean($validated['map_url']['iframe']);
+            }
 
             DB::beginTransaction();
 
