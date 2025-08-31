@@ -26,8 +26,8 @@ class TourPackage extends Model
         'card_highlights',
         'detailed_highlights',
         'itinerary',
-        'map_url',       // ✅ keep as string
-        'map_iframe',    // ✅ new iframe field
+        'map_url',       
+        'map_iframe',    
         'includes',
         'excludes',
         'faqs',

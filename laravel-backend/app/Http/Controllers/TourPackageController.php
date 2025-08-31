@@ -55,24 +55,7 @@ class TourPackageController extends Controller
                 'itinerary.*.day' => 'required_with:itinerary|string|max:255',
                 'itinerary.*.description' => 'required_with:itinerary|string',
                 'map_url' => 'nullable|url',
-      'map' => [
-    'nullable',
-    'string',
-    function ($attribute, $value, $fail) {
-        // Check if it's a valid URL
-        if (filter_var($value, FILTER_VALIDATE_URL)) {
-            if (!str_contains($value, 'google.com/maps')) {
-                $fail("The $attribute must be a valid Google Maps URL.");
-            }
-            return;
-        }
-
-        // Check if it's a valid iframe
-        if (!preg_match('/^<iframe\s+[^>]*src=["\']https:\/\/www\.google\.com\/maps\/embed\/?.*?["\'][^>]*>.*<\/iframe>$/i', $value)) {
-            $fail("The $attribute must be a valid Google Maps embed iframe or URL.");
-        }
-    },
-],
+     'map_iframe' => 'nullable|string',
 
                 
                 'includes' => 'nullable|array',
@@ -159,24 +142,8 @@ class TourPackageController extends Controller
                 'itinerary.*.day' => 'required_with:itinerary|string|max:255',
                 'itinerary.*.description' => 'required_with:itinerary|string',
                 'map_url' => 'sometimes|nullable|url',
-             'map' => [
-    'nullable',
-    'string',
-    function ($attribute, $value, $fail) {
-        // Check if it's a valid URL
-        if (filter_var($value, FILTER_VALIDATE_URL)) {
-            if (!str_contains($value, 'google.com/maps')) {
-                $fail("The $attribute must be a valid Google Maps URL.");
-            }
-            return;
-        }
+         'map_iframe' => 'sometimes|nullable|string',
 
-        // Check if it's a valid iframe
-        if (!preg_match('/^<iframe\s+[^>]*src=["\']https:\/\/www\.google\.com\/maps\/embed\/?.*?["\'][^>]*>.*<\/iframe>$/i', $value)) {
-            $fail("The $attribute must be a valid Google Maps embed iframe or URL.");
-        }
-    },
-],
 
 
                 'includes' => 'sometimes|nullable|array',

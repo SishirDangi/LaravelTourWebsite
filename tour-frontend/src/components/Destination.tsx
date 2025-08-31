@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import DestinationLayout from "./DestinationLayout";
 import {
@@ -65,10 +66,10 @@ export default function Destination() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const cardsPerPage = 15;
+  const navigate = useNavigate();
 
   // Fetch destinations and tour packages
   useEffect(() => {
-    // Fetch tour packages first
     axios
       .get(`${API_BASE}/tour-packages`)
       .then((res) => {
@@ -77,12 +78,10 @@ export default function Destination() {
         );
         setPackages(filteredPackages);
 
-        // Fetch destinations and filter based on available packages
         axios
           .get(`${API_BASE}/destinations`)
           .then((res) => {
             const allDestinations = res.data.data;
-            // Filter destinations that have at least one package
             const destinationsWithPackages = allDestinations.filter((dest: Destination) =>
               filteredPackages.some((pkg: TourPackage) => pkg.destination.id === dest.id)
             );
@@ -114,7 +113,7 @@ export default function Destination() {
 
   const paginate = (pageNumber: number) => {
     setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: "smooth" }); // Scroll to top on page change
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Helper: format date nicely
@@ -130,27 +129,27 @@ export default function Destination() {
   return (
     <DestinationLayout>
       {/* Navbar */}
-<nav className="sticky top-10 md:top-20 z-30 bg-gray-200 border-b border-gray-200 shadow-md w-full overflow-x-auto scrollbar-hide">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 flex flex-wrap justify-center gap-4 sm:gap-6">
-    {destinations.map((dest) => (
-      <button
-        key={dest.id}
-        onClick={() => {
-          const value = dest.id === 0 ? null : dest.id;
-          setSelectedDestination(value);
-          setCurrentPage(1); 
-        }}
-        className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 whitespace-nowrap ${
-          selectedDestination === dest.id || (dest.id === 0 && selectedDestination === null)
-            ? "bg-orange-500 text-white font-bold"
-            : "text-gray-800 hover:bg-orange-700 hover:text-white"
-        }`}
-      >
-        {dest.name}
-      </button>
-    ))}
-  </div>
-</nav>
+      <nav className="sticky top-10 md:top-20 z-30 bg-gray-200 border-b border-gray-200 shadow-md w-full overflow-x-auto scrollbar-hide">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 flex flex-wrap justify-center gap-4 sm:gap-6">
+          {destinations.map((dest) => (
+            <button
+              key={dest.id}
+              onClick={() => {
+                const value = dest.id === 0 ? null : dest.id;
+                setSelectedDestination(value);
+                setCurrentPage(1);
+              }}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 whitespace-nowrap ${
+                selectedDestination === dest.id || (dest.id === 0 && selectedDestination === null)
+                  ? "bg-orange-500 text-white font-bold"
+                  : "text-gray-800 hover:bg-orange-700 hover:text-white"
+              }`}
+            >
+              {dest.name}
+            </button>
+          ))}
+        </div>
+      </nav>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8">
@@ -166,7 +165,7 @@ export default function Destination() {
               {currentCards.map((pkg) => {
                 const mainImage =
                   pkg.images.find((img) => img.is_main) || pkg.images[0];
-                const currencySymbol = pkg.currency === "USD" ? "$" : pkg.currency;
+                const currencySymbol = pkg.currency === "USD" ? "$" : "Rs.";
                 const originalPrice = parseFloat(pkg.price as string);
                 const discountedPrice = pkg.discount
                   ? originalPrice * (1 - pkg.discount / 100)
@@ -182,7 +181,7 @@ export default function Destination() {
                       {mainImage && (
                         <div className="w-full h-48 sm:h-56 md:h-64 overflow-hidden">
                           <img
-                            src={`http://localhost:8000/storage/${mainImage.image_path}`}
+                            src={`${API_BASE.replace("/api", "")}/storage/${mainImage.image_path}`}
                             alt={pkg.name}
                             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                             style={{ transformOrigin: "center" }}
@@ -278,7 +277,7 @@ export default function Destination() {
                             ))}
                             {pkg.card_highlights.length > 3 && (
                               <span className="text-xs text-gray-500 self-center">
-                                +{pkg.card_highlights.length - 3} more
+                                +{pkg.card_highlights.length - 3} MORE
                               </span>
                             )}
                           </div>
@@ -287,7 +286,10 @@ export default function Destination() {
 
                       {/* Actions */}
                       <div className="mt-auto flex flex-col sm:flex-row justify-center items-center gap-3">
-                        <button className="relative bg-gradient-to-r from-blue-600 to-blue-800 text-white px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-semibold overflow-hidden transition-all duration-300 hover:from-blue-700 hover:to-blue-900 group w-full sm:w-auto">
+                        <button
+                          onClick={() => navigate(`/packages/${pkg.id}`)}
+                          className="relative bg-gradient-to-r from-blue-600 to-blue-800 text-white px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-semibold overflow-hidden transition-all duration-300 hover:from-blue-700 hover:to-blue-900 group w-full sm:w-auto"
+                        >
                           <span className="relative z-10">View Details</span>
                           <span className="absolute inset-0 bg-blue-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></span>
                         </button>

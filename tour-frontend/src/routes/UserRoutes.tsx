@@ -36,7 +36,7 @@ const UserRoutes: React.FC = () => {
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/about" element={<About />} />
           <Route path="/destination" element={<Destination />} />
-          <Route path="/packagedetails" element={<PackageDetails />} />
+          <Route path="/packages/:id" element={<PackageDetails />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
