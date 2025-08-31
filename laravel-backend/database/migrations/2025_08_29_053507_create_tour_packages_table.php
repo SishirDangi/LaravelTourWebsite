@@ -25,7 +25,11 @@ return new class extends Migration {
             $table->json('card_highlights')->nullable();
             $table->json('detailed_highlights')->nullable();
             $table->json('itinerary')->nullable();
-            $table->json('map_url')->nullable(); 
+
+            // ✅ Separate fields
+            $table->string('map_url')->nullable();       // just the Google Maps link
+            $table->longText('map_iframe')->nullable();  // full iframe HTML
+
             $table->json('includes')->nullable();
             $table->json('excludes')->nullable();
             $table->json('faqs')->nullable();

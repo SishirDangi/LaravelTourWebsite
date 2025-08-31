@@ -26,7 +26,8 @@ class TourPackage extends Model
         'card_highlights',
         'detailed_highlights',
         'itinerary',
-        'map_url',
+        'map_url',       // ✅ keep as string
+        'map_iframe',    // ✅ new iframe field
         'includes',
         'excludes',
         'faqs',
@@ -40,13 +41,12 @@ class TourPackage extends Model
         'min_people' => 'integer',
         'max_people' => 'integer',
         'duration_days' => 'integer',
-        'card_highlights' => 'array', // Cast JSON to array
-        'detailed_highlights' => 'array', // Cast JSON to array
-        'itinerary' => 'array', // Cast JSON to array
-        'map_url' => 'array', // Cast JSON to array for URL and iframe
-        'includes' => 'array', // Cast JSON to array
-        'excludes' => 'array', // Cast JSON to array
-        'faqs' => 'array', // Cast JSON to array
+        'card_highlights' => 'array',       // JSON → array
+        'detailed_highlights' => 'array',   // JSON → array
+        'itinerary' => 'array',             // JSON → array
+        'includes' => 'array',              // JSON → array
+        'excludes' => 'array',              // JSON → array
+        'faqs' => 'array',                  // JSON → array
     ];
 
     public function destination()

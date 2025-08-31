@@ -9,6 +9,8 @@ import Header from "../components/Header";
 import NotFound from "../components/NotFound";
 import BlogPage from "../components/BlogPage";
 import About from "../components/About";
+import Destination from "../components/Destination";
+import PackageDetails from "../components/PackageDetails";
 
 
 // Lazy-loaded page component
@@ -33,6 +35,8 @@ const UserRoutes: React.FC = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/about" element={<About />} />
+          <Route path="/destination" element={<Destination />} />
+          <Route path="/packagedetails" element={<PackageDetails />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>

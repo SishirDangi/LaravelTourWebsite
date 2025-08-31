@@ -44,9 +44,7 @@ const Navbar: React.FC = () => {
     {
       label: 'Destination',
       subpages: [
-        { path: '/destination/nepal', label: 'Nepal' },
-        { path: '/destination/tibet', label: 'Tibet' },
-        { path: '/destination/bhutan', label: 'Bhutan' },
+        { path: '/destination', label: 'Destination' },
       ],
     },
     {

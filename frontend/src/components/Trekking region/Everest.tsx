@@ -1,8 +1,52 @@
-import React from 'react'
-import PackageCard from '../PackagesCard'
-import { Calendar, Users, Mountain, MapPin, Clock } from 'lucide-react'
+import React from 'react';
+import PackageCard from '../PackagesCard';
+import { Calendar, Users, Mountain, MapPin, Clock } from 'lucide-react';
 
-const everestPackages = [
+// Define the interface for the package details
+interface PackageDetail {
+  icon: JSX.Element; // Using JSX.Element to match expected type
+  label: string;
+}
+
+// Define the interface for the rating
+interface Rating {
+  value: number;
+  reviews: number;
+}
+
+// Define the interface for each package
+interface EverestPackage {
+  id: number;
+  title: string;
+  image: string;
+  price: number;
+  badge: string;
+  description: string;
+  rating: Rating;
+  details: PackageDetail[];
+  highlights: string[];
+  author: string; // Added author property
+  publishedAt: string; // Added publishedAt property (assuming string for formatted date)
+}
+
+// Define the props for the PackageCard component
+interface PackageCard {
+  index: number;
+  image: string;
+  price: number;
+  badge: string;
+  title: string;
+  description: string;
+  rating: Rating;
+  details: PackageDetail[];
+  highlights: string[];
+  actions: React.ReactNode;
+  author: string; // Added author property
+  publishedAt: string; // Added publishedAt property
+}
+
+// Define the everestPackages array with type
+const everestPackages: EverestPackage[] = [
   {
     id: 1,
     title: 'Everest Base Camp Trek (EBC)',
@@ -23,7 +67,9 @@ const everestPackages = [
       'Namche Bazaar',
       'Kala Patthar view',
       'EBC'
-    ]
+    ],
+    author: 'Himalayan Adventures', // Example author
+    publishedAt: '2025-08-01' // Example published date
   },
   {
     id: 2,
@@ -40,7 +86,9 @@ const everestPackages = [
       { icon: <Users className='h-4 w-4' />, label: '2–10 people' },
       { icon: <MapPin className='h-4 w-4' />, label: 'Gokyo, Cho La, EBC' }
     ],
-    highlights: ['Gokyo Ri', 'Lakes', 'Cho La Pass', 'EBC']
+    highlights: ['Gokyo Ri', 'Lakes', 'Cho La Pass', 'EBC'],
+    author: 'Himalayan Adventures',
+    publishedAt: '2025-08-01'
   },
   {
     id: 3,
@@ -60,7 +108,9 @@ const everestPackages = [
         label: 'Kongma La, Cho La, Renjo La'
       }
     ],
-    highlights: ['All Three Passes', 'EBC', 'Panoramic Views', 'Remote Trails']
+    highlights: ['All Three Passes', 'EBC', 'Panoramic Views', 'Remote Trails'],
+    author: 'Himalayan Adventures',
+    publishedAt: '2025-08-01'
   },
   {
     id: 4,
@@ -77,7 +127,9 @@ const everestPackages = [
       { icon: <Users className='h-4 w-4' />, label: '2–8 people' },
       { icon: <MapPin className='h-4 w-4' />, label: 'Tengboche' }
     ],
-    highlights: ['Easy Trek', 'Great Views', 'Sherpa Culture']
+    highlights: ['Easy Trek', 'Great Views', 'Sherpa Culture'],
+    author: 'Himalayan Adventures',
+    publishedAt: '2025-08-01'
   },
   {
     id: 5,
@@ -94,7 +146,9 @@ const everestPackages = [
       { icon: <Users className='h-4 w-4' />, label: 'Any group size' },
       { icon: <MapPin className='h-4 w-4' />, label: 'Namche, Syangboche' }
     ],
-    highlights: ['Short Timeframe', 'Namche', 'Scenic Flights']
+    highlights: ['Short Timeframe', 'Namche', 'Scenic Flights'],
+    author: 'Himalayan Adventures',
+    publishedAt: '2025-08-01'
   },
   {
     id: 6,
@@ -111,11 +165,14 @@ const everestPackages = [
       { icon: <Users className='h-4 w-4' />, label: '1–5 people' },
       { icon: <MapPin className='h-4 w-4' />, label: 'Kala Patthar, Lukla' }
     ],
-    highlights: ['Luxury View', 'No Trekking', 'Fastest Everest Experience']
+    highlights: ['Luxury View', 'No Trekking', 'Fastest Everest Experience'],
+    author: 'Himalayan Adventures',
+    publishedAt: '2025-08-01'
   }
-]
+];
 
-const Everest = () => {
+// Define the component with React.FC
+const Everest: React.FC = () => {
   return (
     <section className='py-12 bg-white'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8'>
@@ -131,6 +188,8 @@ const Everest = () => {
             rating={pkg.rating}
             details={pkg.details}
             highlights={pkg.highlights}
+            author={pkg.author} // Pass author
+            publishedAt={pkg.publishedAt} // Pass publishedAt
             actions={
               <>
                 <button className='flex-1 bg-blue-700 text-white py-3 rounded-lg hover:bg-blue-800 transition-colors duration-200 font-semibold'>
@@ -145,8 +204,8 @@ const Everest = () => {
         ))}
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default Everest
-export { everestPackages }
+export default Everest;
+export { everestPackages };

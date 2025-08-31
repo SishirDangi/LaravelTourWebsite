@@ -39,11 +39,6 @@ interface FaqItem {
   answer: string;
 }
 
-interface MapUrl {
-  url: string;
-  iframe: string;
-}
-
 interface TourPackage {
   id: number;
   name: string;
@@ -63,7 +58,8 @@ interface TourPackage {
   card_highlights?: string[];
   detailed_highlights?: string[];
   itinerary?: ItineraryItem[];
-  map_url?: MapUrl;
+  map_url?: string; // ✅ Changed to string
+  map_iframe?: string; // ✅ Changed to string
   includes?: string[];
   excludes?: string[];
   faqs?: FaqItem[];
@@ -97,7 +93,8 @@ interface FormState {
   card_highlights: string[];
   detailed_highlights: string[];
   itinerary: ItineraryItem[];
-  map_url: MapUrl;
+  map_url: string;
+  map_iframe: string;
   includes: string[];
   excludes: string[];
   faqs: FaqItem[];
@@ -344,28 +341,28 @@ const TourPackageDetailModal: React.FC<TourPackageDetailModalProps> = ({ tourPac
                 <p className="text-gray-700">No itinerary available</p>
               )}
             </div>
-            <div className="mb-6">
-              <h3 className="font-semibold text-gray-700 mb-4 text-2xl">Map URL</h3>
-              {tourPackage.map_url ? (
-                <div>
-                  {tourPackage.map_url.url && (
-                    <a
-                      href={tourPackage.map_url.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline block"
-                    >
-                      {tourPackage.map_url.url}
-                    </a>
-                  )}
-                  {tourPackage.map_url.iframe && (
-                    <div dangerouslySetInnerHTML={{ __html: tourPackage.map_url.iframe }} />
-                  )}
-                </div>
-              ) : (
-                <p className="text-gray-700">No map available</p>
-              )}
-            </div>
+           <div className="mb-6">
+  <h3 className="font-semibold text-gray-700 mb-4 text-2xl">Map</h3>
+  {(tourPackage.map_url || tourPackage.map_iframe) ? (
+    <div>
+      {tourPackage.map_url && (
+        <a
+          href={tourPackage.map_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:underline block mb-2"
+        >
+          {tourPackage.map_url}
+        </a>
+      )}
+      {tourPackage.map_iframe && (
+        <div dangerouslySetInnerHTML={{ __html: tourPackage.map_iframe }} />
+      )}
+    </div>
+  ) : (
+    <p className="text-gray-700">No map available</p>
+  )}
+</div>
             <div className="mb-6">
               <h3 className="font-semibold text-gray-700 mb-4 text-2xl">Includes</h3>
               {tourPackage.includes && tourPackage.includes.length > 0 ? (
@@ -425,29 +422,30 @@ const AdminTourPackage: React.FC = () => {
   const [statuses, setStatuses] = useState<Option[]>([]);
   const [selectedDestination, setSelectedDestination] = useState<string>("all");
   const [form, setForm] = useState<FormState>({
-    name: "",
-    destination_id: "",
-    tour_type_id: "",
-    level_id: "",
-    subcategory: "",
-    price: "",
-    discount: "",
-    currency: "USD",
-    duration_days: "",
-    height_meters: "",
-    location: "",
-    min_people: "",
-    max_people: "",
-    overview: "",
-    card_highlights: [],
-    detailed_highlights: [],
-    itinerary: [],
-    map_url: { url: "", iframe: "" },
-    includes: [],
-    excludes: [],
-    faqs: [],
-    status_id: null,
-  });
+  name: "",
+  destination_id: "",
+  tour_type_id: "",
+  level_id: "",
+  subcategory: "",
+  price: "",
+  discount: "",
+  currency: "USD",
+  duration_days: "",
+  height_meters: "",
+  location: "",
+  min_people: "",
+  max_people: "",
+  overview: "",
+  card_highlights: [],
+  detailed_highlights: [],
+  itinerary: [],
+  map_url: "", 
+  map_iframe: "", 
+  includes: [],
+  excludes: [],
+  faqs: [],
+  status_id: null,
+});
   const [images, setImages] = useState<File[]>([]);
   const [errors, setErrors] = useState<Errors>({});
   const [fileError, setFileError] = useState<string>("");
@@ -557,23 +555,17 @@ const AdminTourPackage: React.FC = () => {
     },
   });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    if (name === "status_id") {
-      setForm((prev) => ({ ...prev, [name]: value ? parseInt(value, 10) : null }));
-    } else if (name.startsWith("map_url.")) {
-      const key = name.split(".")[1] as keyof MapUrl;
-      setForm((prev) => ({
-        ...prev,
-        map_url: { ...prev.map_url, [key]: value },
-      }));
-    } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
-    }
-    setErrors((prev) => ({ ...prev, [name]: undefined }));
-  };
+const handleChange = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+) => {
+  const { name, value } = e.target;
+  if (name === "status_id") {
+    setForm((prev) => ({ ...prev, [name]: value ? parseInt(value, 10) : null }));
+  } else {
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }
+  setErrors((prev) => ({ ...prev, [name]: undefined }));
+};
 
   const addCardHighlight = () => {
     if (newCardHighlight.trim()) {
@@ -716,151 +708,143 @@ const AdminTourPackage: React.FC = () => {
     return Object.keys(err).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
-    setLoading(true);
-    const formData = new FormData();
-    Object.entries(form).forEach(([key, val]) => {
-      if (key === "card_highlights") {
-        (val as string[]).forEach((item, idx) => formData.append(`card_highlights[${idx}]`, item));
-      } else if (key === "detailed_highlights") {
-        (val as string[]).forEach((item, idx) => formData.append(`detailed_highlights[${idx}]`, item));
-      } else if (key === "itinerary") {
-        (val as ItineraryItem[]).forEach((item, idx) => {
-          formData.append(`itinerary[${idx}][day]`, item.day);
-          formData.append(`itinerary[${idx}][description]`, item.description);
-        });
-      } else if (key === "map_url") {
-        const map = val as MapUrl;
-        if (map.url) formData.append("map_url[url]", map.url);
-        if (map.iframe) formData.append("map_url[iframe]", map.iframe);
-      } else if (key === "includes") {
-        (val as string[]).forEach((item, idx) => formData.append(`includes[${idx}]`, item));
-      } else if (key === "excludes") {
-        (val as string[]).forEach((item, idx) => formData.append(`excludes[${idx}]`, item));
-      } else if (key === "faqs") {
-        (val as FaqItem[]).forEach((item, idx) => {
-          formData.append(`faqs[${idx}][question]`, item.question);
-          formData.append(`faqs[${idx}][answer]`, item.answer);
-        });
-      } else if (val !== null && val !== "") {
-        formData.append(key, val.toString());
-      }
-    });
-    images.forEach((img) => {
-      formData.append("images[]", img);
-    });
-    deletedImageIds.forEach((id) => {
-      formData.append("deleted_images[]", id.toString());
-    });
-    console.log("Form data being sent:");
-    for (let pair of formData.entries()) {
-      console.log(`${pair[0]}: ${pair[1]}`);
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!validate()) return;
+  setLoading(true);
+  const formData = new FormData();
+  Object.entries(form).forEach(([key, val]) => {
+    if (key === "card_highlights") {
+      (val as string[]).forEach((item, idx) => formData.append(`card_highlights[${idx}]`, item));
+    } else if (key === "detailed_highlights") {
+      (val as string[]).forEach((item, idx) => formData.append(`detailed_highlights[${idx}]`, item));
+    } else if (key === "itinerary") {
+      (val as ItineraryItem[]).forEach((item, idx) => {
+        formData.append(`itinerary[${idx}][day]`, item.day);
+        formData.append(`itinerary[${idx}][description]`, item.description);
+      });
+    } else if (key === "includes") {
+      (val as string[]).forEach((item, idx) => formData.append(`includes[${idx}]`, item));
+    } else if (key === "excludes") {
+      (val as string[]).forEach((item, idx) => formData.append(`excludes[${idx}]`, item));
+    } else if (key === "faqs") {
+      (val as FaqItem[]).forEach((item, idx) => {
+        formData.append(`faqs[${idx}][question]`, item.question);
+        formData.append(`faqs[${idx}][answer]`, item.answer);
+      });
+    } else if (val !== null && val !== "") {
+      formData.append(key, val.toString());
     }
-    try {
-      let res: AxiosResponse<{ data: TourPackage }>;
-      if (isEditing && editingId) {
-        res = await axios.post(
-          `${API_BASE_URL}/tour-packages/${editingId}?_method=PUT`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-        console.log("Server response for update:", res.data.data);
-        setTourPackages((prev) =>
-          prev
-            .map((tp) => {
-              if (tp.id === editingId) {
-                return {
-                  ...res.data.data,
-                  destination: {
-                    id: Number(res.data.data.destination_id),
-                    name: destinations.find((d) => d.id === Number(res.data.data.destination_id))?.name || "N/A",
-                  },
-                  tour_type: {
-                    id: Number(res.data.data.tour_type_id),
-                    name: tourTypes.find((tt) => tt.id === Number(res.data.data.tour_type_id))?.name || "N/A",
-                  },
-                  level: {
-                    id: Number(res.data.data.level_id),
-                    name: levels.find((l) => l.id === Number(res.data.data.level_id))?.name || "N/A",
-                  },
-                  status: {
-                    id: Number(res.data.data.status_id),
-                    name: res.data.data.status_id === 4 ? "Available" : "Unavailable",
-                  },
-                  images: res.data.data.images || [],
-                };
-              }
-              return tp;
-            })
-            .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))
-        );
-        toast.success("Tour package updated successfully");
-      } else {
-        res = await axios.post(
-          `${API_BASE_URL}/tour-packages`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-        setTourPackages((prev) =>
-          [
-            ...prev,
-            {
-              ...res.data.data,
-              destination: {
-                id: Number(res.data.data.destination_id),
-                name: destinations.find((d) => d.id === Number(res.data.data.destination_id))?.name || "N/A",
-              },
-              tour_type: {
-                id: Number(res.data.data.tour_type_id),
-                name: tourTypes.find((tt) => tt.id === Number(res.data.data.tour_type_id))?.name || "N/A",
-              },
-              level: {
-                id: Number(res.data.data.level_id),
-                name: levels.find((l) => l.id === Number(res.data.data.level_id))?.name || "N/A",
-              },
-              status: {
-                id: Number(res.data.data.status_id),
-                name: res.data.data.status_id === 4 ? "Available" : "Unavailable",
-              },
-              images: res.data.data.images || [],
-            },
-          ].sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))
-        );
-        toast.success("Tour package created successfully");
-      }
-      setShowForm(false);
-      resetForm();
-      await fetchTourPackages();
-    } catch (err: unknown) {
-      const error = err as AxiosError<ApiErrorResponse>;
-      console.error("Error in handleSubmit:", error.response?.data);
-      if (error.response?.status === 422 && error.response.data?.errors) {
-        const serverErrors = error.response.data.errors;
-        const formattedErrors: Errors = {};
-        for (const key in serverErrors) {
-          formattedErrors[key] = serverErrors[key][0];
+  });
+  images.forEach((img) => {
+    formData.append("images[]", img);
+  });
+  deletedImageIds.forEach((id) => {
+    formData.append("deleted_images[]", id.toString());
+  });
+  
+  try {
+    let res: AxiosResponse<{ data: TourPackage }>;
+    if (isEditing && editingId) {
+      res = await axios.post(
+        `${API_BASE_URL}/tour-packages/${editingId}?_method=PUT`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         }
-        setErrors(formattedErrors);
-        toast.error("Please fix the highlighted errors.");
-      } else if (error.response?.status === 409) {
-        toast.error(error.response.data?.message ?? "Conflict occurred.");
-      } else {
-        toast.error(error.response?.data?.message ?? "Failed to save tour package.");
-      }
-    } finally {
-      setLoading(false);
+      );
+      setTourPackages((prev) =>
+        prev
+          .map((tp) => {
+            if (tp.id === editingId) {
+              return {
+                ...res.data.data,
+                destination: {
+                  id: Number(res.data.data.destination_id),
+                  name: destinations.find((d) => d.id === Number(res.data.data.destination_id))?.name || "N/A",
+                },
+                tour_type: {
+                  id: Number(res.data.data.tour_type_id),
+                  name: tourTypes.find((tt) => tt.id === Number(res.data.data.tour_type_id))?.name || "N/A",
+                },
+                level: {
+                  id: Number(res.data.data.level_id),
+                  name: levels.find((l) => l.id === Number(res.data.data.level_id))?.name || "N/A",
+                },
+                status: {
+                  id: Number(res.data.data.status_id),
+                  name: res.data.data.status_id === 4 ? "Available" : "Unavailable",
+                },
+                images: res.data.data.images || [],
+              };
+            }
+            return tp;
+          })
+          .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))
+      );
+      toast.success("Tour package updated successfully");
+    } else {
+      res = await axios.post(
+        `${API_BASE_URL}/tour-packages`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setTourPackages((prev) =>
+        [
+          ...prev,
+          {
+            ...res.data.data,
+            destination: {
+              id: Number(res.data.data.destination_id),
+              name: destinations.find((d) => d.id === Number(res.data.data.destination_id))?.name || "N/A",
+            },
+            tour_type: {
+              id: Number(res.data.data.tour_type_id),
+              name: tourTypes.find((tt) => tt.id === Number(res.data.data.tour_type_id))?.name || "N/A",
+            },
+            level: {
+              id: Number(res.data.data.level_id),
+              name: levels.find((l) => l.id === Number(res.data.data.level_id))?.name || "N/A",
+            },
+            status: {
+              id: Number(res.data.data.status_id),
+              name: res.data.data.status_id === 4 ? "Available" : "Unavailable",
+            },
+            images: res.data.data.images || [],
+          },
+        ].sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))
+      );
+      toast.success("Tour package created successfully");
     }
-  };
+    setShowForm(false);
+    resetForm();
+    await fetchTourPackages();
+  } catch (err: unknown) {
+    const error = err as AxiosError<ApiErrorResponse>;
+    console.error("Error in handleSubmit:", error.response?.data);
+    if (error.response?.status === 422 && error.response.data?.errors) {
+      const serverErrors = error.response.data.errors;
+      const formattedErrors: Errors = {};
+      for (const key in serverErrors) {
+        formattedErrors[key] = serverErrors[key][0];
+      }
+      setErrors(formattedErrors);
+      toast.error("Please fix the highlighted errors.");
+    } else if (error.response?.status === 409) {
+      toast.error(error.response.data?.message ?? "Conflict occurred.");
+    } else {
+      toast.error(error.response?.data?.message ?? "Failed to save tour package.");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleAddDestination = async () => {
     const trimmedName = newDestination.trim();
@@ -1012,82 +996,84 @@ const AdminTourPackage: React.FC = () => {
   };
 
   const resetForm = () => {
-    setForm({
-      name: "",
-      destination_id: "",
-      tour_type_id: "",
-      level_id: "",
-      subcategory: "",
-      price: "",
-      discount: "",
-      currency: "USD",
-      duration_days: "",
-      height_meters: "",
-      location: "",
-      min_people: "",
-      max_people: "",
-      overview: "",
-      card_highlights: [],
-      detailed_highlights: [],
-      itinerary: [],
-      map_url: { url: "", iframe: "" },
-      includes: [],
-      excludes: [],
-      faqs: [],
-      status_id: null,
-    });
-    setImages([]);
-    setExistingImages([]);
-    setDeletedImageIds([]);
-    setErrors({});
-    setFileError("");
-    setIsEditing(false);
-    setEditingId(null);
-    setNewCardHighlight("");
-    setNewDetailedHighlight("");
-    setNewItineraryDay("");
-    setNewItineraryDesc("");
-    setNewInclude("");
-    setNewExclude("");
-    setNewFaqQuestion("");
-    setNewFaqAnswer("");
-  };
+  setForm({
+    name: "",
+    destination_id: "",
+    tour_type_id: "",
+    level_id: "",
+    subcategory: "",
+    price: "",
+    discount: "",
+    currency: "USD",
+    duration_days: "",
+    height_meters: "",
+    location: "",
+    min_people: "",
+    max_people: "",
+    overview: "",
+    card_highlights: [],
+    detailed_highlights: [],
+    itinerary: [],
+    map_url: "", // ✅ Changed to string
+    map_iframe: "", // ✅ Changed to string
+    includes: [],
+    excludes: [],
+    faqs: [],
+    status_id: null,
+  });
+  setImages([]);
+  setExistingImages([]);
+  setDeletedImageIds([]);
+  setErrors({});
+  setFileError("");
+  setIsEditing(false);
+  setEditingId(null);
+  setNewCardHighlight("");
+  setNewDetailedHighlight("");
+  setNewItineraryDay("");
+  setNewItineraryDesc("");
+  setNewInclude("");
+  setNewExclude("");
+  setNewFaqQuestion("");
+  setNewFaqAnswer("");
+};
 
-  const handleEdit = (tourPackage: TourPackage) => {
-    setForm({
-      name: tourPackage.name ?? "",
-      destination_id: tourPackage.destination?.id?.toString() ?? tourPackage.destination_id?.toString() ?? "",
-      tour_type_id: tourPackage.tour_type?.id?.toString() ?? tourPackage.tour_type_id?.toString() ?? "",
-      level_id: tourPackage.level?.id?.toString() ?? tourPackage.level_id?.toString() ?? "",
-      subcategory: tourPackage.subcategory ?? "",
-      price: tourPackage.price?.toString() ?? "",
-      discount: tourPackage.discount?.toString() ?? "",
-      currency: tourPackage.currency ?? "USD",
-      duration_days: tourPackage.duration_days?.toString() ?? "",
-      height_meters: tourPackage.height_meters?.toString() ?? "",
-      location: tourPackage.location ?? "",
-      min_people: tourPackage.min_people?.toString() ?? "",
-      max_people: tourPackage.max_people?.toString() ?? "",
-      overview: tourPackage.overview ?? "",
-      card_highlights: tourPackage.card_highlights ?? [],
-      detailed_highlights: tourPackage.detailed_highlights ?? [],
-      itinerary: tourPackage.itinerary ?? [],
-      map_url: tourPackage.map_url ?? { url: "", iframe: "" },
-      includes: tourPackage.includes ?? [],
-      excludes: tourPackage.excludes ?? [],
-      faqs: tourPackage.faqs ?? [],
-      status_id: tourPackage.status_id ?? null,
-    });
-    setExistingImages(tourPackage.images ?? []);
-    setDeletedImageIds([]);
-    setImages([]);
-    setIsEditing(true);
-    setEditingId(tourPackage.id);
-    setShowForm(true);
-    setTimeout(() => {
-      formRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 200);
-  };
+ const handleEdit = (tourPackage: TourPackage) => {
+  setForm({
+    name: tourPackage.name ?? "",
+    destination_id: tourPackage.destination?.id?.toString() ?? tourPackage.destination_id?.toString() ?? "",
+    tour_type_id: tourPackage.tour_type?.id?.toString() ?? tourPackage.tour_type_id?.toString() ?? "",
+    level_id: tourPackage.level?.id?.toString() ?? tourPackage.level_id?.toString() ?? "",
+    subcategory: tourPackage.subcategory ?? "",
+    price: tourPackage.price?.toString() ?? "",
+    discount: tourPackage.discount?.toString() ?? "",
+    currency: tourPackage.currency ?? "USD",
+    duration_days: tourPackage.duration_days?.toString() ?? "",
+    height_meters: tourPackage.height_meters?.toString() ?? "",
+    location: tourPackage.location ?? "",
+    min_people: tourPackage.min_people?.toString() ?? "",
+    max_people: tourPackage.max_people?.toString() ?? "",
+    overview: tourPackage.overview ?? "",
+    card_highlights: tourPackage.card_highlights ?? [],
+    detailed_highlights: tourPackage.detailed_highlights ?? [],
+    itinerary: tourPackage.itinerary ?? [],
+    map_url: tourPackage.map_url ?? "", // ✅ Changed to string
+    map_iframe: tourPackage.map_iframe ?? "", // ✅ Changed to string
+    includes: tourPackage.includes ?? [],
+    excludes: tourPackage.excludes ?? [],
+    faqs: tourPackage.faqs ?? [],
+    status_id: tourPackage.status_id ?? null,
+  });
+  setExistingImages(tourPackage.images ?? []);
+  setDeletedImageIds([]);
+  setImages([]);
+  setIsEditing(true);
+  setEditingId(tourPackage.id);
+  setShowForm(true);
+  setTimeout(() => {
+    formRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, 200);
+};
 
   const removeExistingImage = (id: number) => {
     setExistingImages((prev) => prev.filter((img) => img.id !== id));
@@ -1638,25 +1624,38 @@ const AdminTourPackage: React.FC = () => {
                       </ul>
                     </div>
                     <div className="md:col-span-2 border border-gray-300 rounded-lg p-4 shadow-sm">
-                      <label className="block text-sm font-medium text-gray-800 mb-1">
-                        Map URL
-                      </label>
-                      <input
-                        name="map_url.url"
-                        value={form.map_url.url}
-                        onChange={handleChange}
-                        placeholder="https://example.com/map"
-                        className={`w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-50 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition mb-2`}
-                      />
-                      <textarea
-                        name="map_url.iframe"
-                        value={form.map_url.iframe}
-                        onChange={handleChange}
-                        placeholder="<iframe src='...'></iframe>"
-                        rows={3}
-                        className={`w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-50 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition`}
-                      />
-                    </div>
+  <label className="block text-sm font-medium text-gray-800 mb-1">
+    Map URL
+  </label>
+  <input
+    name="map_url"
+    value={form.map_url}
+    onChange={handleChange}
+    placeholder="https://example.com/map"
+    className={`w-full px-4 py-2 rounded-md border ${
+      errors.map_url ? "border-red-500" : "border-gray-300"
+    } bg-gray-50 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition mb-2`}
+  />
+  {errors.map_url && (
+    <p className="text-sm text-red-600 mt-1">{errors.map_url}</p>
+  )}
+  <label className="block text-sm font-medium text-gray-800 mb-1">
+    Map Iframe
+  </label>
+  <textarea
+  name="map_iframe"
+  value={form.map_iframe}
+  onChange={handleChange}
+  placeholder="<iframe src='...'></iframe>"
+  rows={3}
+  className={`w-full px-4 py-2 rounded-md border ${
+    errors.map_iframe ? "border-red-500" : "border-gray-300"
+  } bg-gray-50 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition`}
+/>
+  {errors.map_iframe && (
+    <p className="text-sm text-red-600 mt-1">{errors.map_iframe}</p>
+  )}
+</div>
                     <div className="md:col-span-2 border border-gray-300 rounded-lg p-4 shadow-sm">
                       <label className="block text-sm font-medium text-gray-800 mb-1">
                         Includes

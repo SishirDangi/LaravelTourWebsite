@@ -1,12 +1,24 @@
-import React from 'react'
-import DetailNav from '../components/DetailNav'
-import BookTripSidebar from '../components/BookTripSidebar' // Import booking sidebar
-import everestBaseCampData from '../data/everestBaseCampData'
+import React, { useEffect, useState } from 'react';
+import BookTripSidebar from '../components/BookTripSidebar';
+import everestBaseCampData from '../data/everestBaseCampData';
+
+interface Section {
+  id: string;
+  label: string;
+}
+
+const sections: Section[] = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'highlights', label: 'Highlights' },
+  { id: 'itinerary', label: 'Itinerary' },
+  { id: 'map', label: 'Map' },
+  { id: 'includes-excludes', label: 'Includes/Excludes' },
+  { id: 'faq', label: 'FAQ' },
+];
 
 const EBCtrek: React.FC = () => {
+  const [activeSection, setActiveSection] = useState<string>('overview');
   const {
-    title,
-    description,
     image,
     overview,
     highlights,
@@ -14,47 +26,91 @@ const EBCtrek: React.FC = () => {
     mapEmbedUrl,
     includes,
     excludes,
-    faqs
-  } = everestBaseCampData
+    faqs,
+  } = everestBaseCampData;
+
+  useEffect(() => {
+    const handleScroll = () => {
+      let current: string = '';
+      for (let section of sections) {
+        const el = document.getElementById(section.id);
+        if (el) {
+          const offsetTop = el.offsetTop;
+          if (window.scrollY >= offsetTop - 150) {
+            current = section.id;
+          }
+        }
+      }
+      setActiveSection(current || 'overview');
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollTo = (id: string): void => {
+    const el = document.getElementById(id);
+    if (el) {
+      window.scrollTo({
+        top: el.offsetTop - 144, // Adjusted offset: 64px (navbar) + 80px (this nav)
+        behavior: 'smooth',
+      });
+    }
+  };
 
   return (
     <>
-      {/* <SectionHeader
-        title={title}
-        description={description}
-        backgroundImage={image}
-      /> */}
+      {/* Fixed Navigation Below Main Navbar */}
+      <nav className="fixed top-16 left-0 right-0 z-40 bg-white shadow-md px-4 py-2 border-b">
+        <ul className="flex flex-wrap gap-4 justify-center md:justify-start overflow-x-auto">
+          {sections.map((section) => (
+            <li key={section.id}>
+              <button
+                onClick={() => scrollTo(section.id)}
+                className={`text-sm font-medium px-3 py-1 rounded-md transition ${
+                  activeSection === section.id
+                    ? 'bg-orange-600 text-white'
+                    : 'text-gray-600 hover:bg-orange-100'
+                }`}
+              >
+                {section.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
 
-      <DetailNav />
+      {/* Spacer for navbar + this nav (64 + 56 = 120px approx) */}
+      <div className="h-[120px]"></div>
 
       {/* Main container with details on left and booking sidebar on right */}
-      <div className='flex flex-col md:flex-row gap-8 px-4 py-8 max-w-7xl mx-auto'>
+      <div className="flex flex-col md:flex-row gap-8 px-4 py-8 max-w-7xl mx-auto">
         {/* Details content on left */}
-        <main className='flex-1 space-y-8'>
-          <section id='overview'>
-            <h2 className='text-2xl font-bold mb-4'>Overview</h2>
-            <p className='text-gray-700 mb-6'>{overview}</p>
+        <main className="flex-1 space-y-8">
+          <section id="overview">
+            <h2 className="text-2xl font-bold mb-4">Overview</h2>
+            <p className="text-gray-700 mb-6">{overview}</p>
 
             {/* Image below overview */}
             <img
               src={image}
-              alt='Everest Base Camp Trek'
-              className='w-full max-w-4xl mx-auto rounded-lg shadow-md'
+              alt="Everest Base Camp Trek"
+              className="w-full max-w-4xl mx-auto rounded-lg shadow-md"
             />
           </section>
 
-          <section id='highlights'>
-            <h2 className='text-2xl font-bold mb-4'>Highlights</h2>
-            <ul className='list-disc list-inside space-y-2 text-gray-700'>
+          <section id="highlights">
+            <h2 className="text-2xl font-bold mb-4">Highlights</h2>
+            <ul className="list-disc list-inside space-y-2 text-gray-700">
               {highlights.map((item: string, index: number) => (
                 <li key={index}>{item}</li>
               ))}
             </ul>
           </section>
 
-          <section id='itinerary'>
-            <h2 className='text-2xl font-bold mb-4'>Itinerary</h2>
-            <div className='space-y-4'>
+          <section id="itinerary">
+            <h2 className="text-2xl font-bold mb-4">Itinerary</h2>
+            <div className="space-y-4">
               {itinerary.map(
                 (
                   dayItem: { day: number; title: string; description: string },
@@ -62,47 +118,47 @@ const EBCtrek: React.FC = () => {
                 ) => (
                   <div
                     key={index}
-                    className='border-l-4 border-orange-500 pl-4'
+                    className="border-l-4 border-orange-500 pl-4"
                   >
-                    <h3 className='font-semibold'>
+                    <h3 className="font-semibold">
                       Day {dayItem.day}: {dayItem.title}
                     </h3>
-                    <p className='text-gray-600'>{dayItem.description}</p>
+                    <p className="text-gray-600">{dayItem.description}</p>
                   </div>
                 )
               )}
             </div>
           </section>
 
-          <section id='map'>
-            <h2 className='text-2xl font-bold mb-4'>Map</h2>
-            <div className='w-full h-[500px]'>
+          <section id="map">
+            <h2 className="text-2xl font-bold mb-4">Map</h2>
+            <div className="w-full h-[500px]">
               <iframe
                 src={mapEmbedUrl}
-                title='Everest Base Camp Trek Map'
-                width='100%'
-                height='100%'
+                title="Everest Base Camp Trek Map"
+                width="100%"
+                height="100%"
                 allowFullScreen
-                loading='lazy'
-                className='rounded-md border'
+                loading="lazy"
+                className="rounded-md border"
               ></iframe>
             </div>
           </section>
 
-          <section id='includes-excludes'>
-            <h2 className='text-2xl font-bold mb-4'>Includes & Excludes</h2>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+          <section id="includes-excludes">
+            <h2 className="text-2xl font-bold mb-4">Includes & Excludes</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h3 className='font-semibold text-lg mb-2'>Included:</h3>
-                <ul className='list-disc list-inside space-y-2 text-gray-700'>
+                <h3 className="font-semibold text-lg mb-2">Included:</h3>
+                <ul className="list-disc list-inside space-y-2 text-gray-700">
                   {includes.map((item: string, index: number) => (
                     <li key={index}>{item}</li>
                   ))}
                 </ul>
               </div>
               <div>
-                <h3 className='font-semibold text-lg mb-2'>Not Included:</h3>
-                <ul className='list-disc list-inside space-y-2 text-gray-700'>
+                <h3 className="font-semibold text-lg mb-2">Not Included:</h3>
+                <ul className="list-disc list-inside space-y-2 text-gray-700">
                   {excludes.map((item: string, index: number) => (
                     <li key={index}>{item}</li>
                   ))}
@@ -111,21 +167,21 @@ const EBCtrek: React.FC = () => {
             </div>
           </section>
 
-          <section id='faq'>
-            <h2 className='text-2xl font-bold mb-4'>
+          <section id="faq">
+            <h2 className="text-2xl font-bold mb-4">
               Frequently Asked Questions
             </h2>
-            <div className='space-y-6'>
+            <div className="space-y-6">
               {faqs.map(
                 (faq: { question: string; answer: string }, index: number) => (
                   <div
                     key={index}
-                    className='bg-gray-50 p-4 rounded-md shadow-sm'
+                    className="bg-gray-50 p-4 rounded-md shadow-sm"
                   >
-                    <h4 className='font-semibold text-lg text-orange-700'>
+                    <h4 className="font-semibold text-lg text-orange-700">
                       Q: {faq.question}
                     </h4>
-                    <p className='text-gray-700 mt-1'>A: {faq.answer}</p>
+                    <p className="text-gray-700 mt-1">A: {faq.answer}</p>
                   </div>
                 )
               )}
@@ -134,12 +190,12 @@ const EBCtrek: React.FC = () => {
         </main>
 
         {/* Booking sidebar on right */}
-        <aside className='w-full md:w-1/3'>
+        <aside className="w-full md:w-1/3">
           <BookTripSidebar />
         </aside>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default EBCtrek
+export default EBCtrek;

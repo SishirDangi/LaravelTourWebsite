@@ -1,52 +1,57 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 
-const sections = [
+interface Section {
+  id: string;
+  label: string;
+}
+
+const sections: Section[] = [
   { id: 'overview', label: 'Overview' },
   { id: 'highlights', label: 'Highlights' },
   { id: 'itinerary', label: 'Itinerary' },
   { id: 'map', label: 'Map' },
   { id: 'includes-excludes', label: 'Includes/Excludes' },
-  { id: 'faq', label: 'FAQ' }
-]
+  { id: 'faq', label: 'FAQ' },
+];
 
-const DetailNav = () => {
-  const [activeSection, setActiveSection] = useState('overview')
+const DetailNav: React.FC = () => {
+  const [activeSection, setActiveSection] = useState<string>('overview');
 
   useEffect(() => {
     const handleScroll = () => {
-      let current = ''
+      let current: string = '';
       for (let section of sections) {
-        const el = document.getElementById(section.id)
+        const el = document.getElementById(section.id);
         if (el) {
-          const offsetTop = el.offsetTop
+          const offsetTop = el.offsetTop;
           if (window.scrollY >= offsetTop - 150) {
-            current = section.id
+            current = section.id;
           }
         }
       }
-      setActiveSection(current || 'overview')
-    }
+      setActiveSection(current || 'overview');
+    };
 
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id)
+  const scrollTo = (id: string): void => {
+    const el = document.getElementById(id);
     if (el) {
       window.scrollTo({
         top: el.offsetTop - 144, // Adjusted offset: 64px (navbar) + 80px (this nav)
-        behavior: 'smooth'
-      })
+        behavior: 'smooth',
+      });
     }
-  }
+  };
 
   return (
     <>
       {/* Fixed Navigation Below Main Navbar */}
-      <nav className='fixed top-16 left-0 right-0 z-40 bg-white shadow-md px-4 py-2 border-b'>
-        <ul className='flex flex-wrap gap-4 justify-center md:justify-start overflow-x-auto'>
-          {sections.map(section => (
+      <nav className="fixed top-16 left-0 right-0 z-40 bg-white shadow-md px-4 py-2 border-b">
+        <ul className="flex flex-wrap gap-4 justify-center md:justify-start overflow-x-auto">
+          {sections.map((section) => (
             <li key={section.id}>
               <button
                 onClick={() => scrollTo(section.id)}
@@ -64,9 +69,9 @@ const DetailNav = () => {
       </nav>
 
       {/* Spacer for navbar + this nav (64 + 56 = 120px approx) */}
-      <div className='h-[120px]'></div>
+      <div className="h-[120px]"></div>
     </>
-  )
-}
+  );
+};
 
-export default DetailNav
+export default DetailNav;

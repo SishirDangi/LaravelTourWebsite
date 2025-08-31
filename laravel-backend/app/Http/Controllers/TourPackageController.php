@@ -12,7 +12,6 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
-use Stevebauman\Purify\Facades\Purify;
 
 class TourPackageController extends Controller
 {
@@ -46,34 +45,47 @@ class TourPackageController extends Controller
                 'height_meters' => 'nullable|integer|min:0',
                 'location' => 'nullable|string|max:255',
                 'min_people' => 'required|integer|min:1',
-                'max_people' => 'required|integer|min:1',
+                'max_people' => 'required|integer|min:1|gte:min_people',
                 'overview' => 'nullable|string',
                 'card_highlights' => 'nullable|array',
-                'card_highlights.*' => 'string',
+                'card_highlights.*' => 'string|max:255',
                 'detailed_highlights' => 'nullable|array',
-                'detailed_highlights.*' => 'string',
+                'detailed_highlights.*' => 'string|max:255',
                 'itinerary' => 'nullable|array',
-                'itinerary.*.day' => 'required|string|max:255',
-                'itinerary.*.description' => 'required|string',
-                'map_url' => 'nullable|array',
-                'map_url.url' => 'nullable|url',
-                'map_url.iframe' => 'nullable|string',
+                'itinerary.*.day' => 'required_with:itinerary|string|max:255',
+                'itinerary.*.description' => 'required_with:itinerary|string',
+                'map_url' => 'nullable|url',
+      'map' => [
+    'nullable',
+    'string',
+    function ($attribute, $value, $fail) {
+        // Check if it's a valid URL
+        if (filter_var($value, FILTER_VALIDATE_URL)) {
+            if (!str_contains($value, 'google.com/maps')) {
+                $fail("The $attribute must be a valid Google Maps URL.");
+            }
+            return;
+        }
+
+        // Check if it's a valid iframe
+        if (!preg_match('/^<iframe\s+[^>]*src=["\']https:\/\/www\.google\.com\/maps\/embed\/?.*?["\'][^>]*>.*<\/iframe>$/i', $value)) {
+            $fail("The $attribute must be a valid Google Maps embed iframe or URL.");
+        }
+    },
+],
+
+                
                 'includes' => 'nullable|array',
-                'includes.*' => 'string',
+                'includes.*' => 'string|max:255',
                 'excludes' => 'nullable|array',
-                'excludes.*' => 'string',
+                'excludes.*' => 'string|max:255',
                 'faqs' => 'nullable|array',
-                'faqs.*.question' => 'required|string',
-                'faqs.*.answer' => 'required|string',
+                'faqs.*.question' => 'required_with:faqs|string|max:255',
+                'faqs.*.answer' => 'required_with:faqs|string',
                 'images' => 'required|array|min:1',
                 'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:512',
                 'status_id' => 'required|in:4,5',
             ]);
-
-            // Sanitize iframe in map_url if present
-            if (isset($validated['map_url']['iframe'])) {
-                $validated['map_url']['iframe'] = Purify::clean($validated['map_url']['iframe']);
-            }
 
             $images = $validated['images'];
             unset($validated['images']);
@@ -137,36 +149,49 @@ class TourPackageController extends Controller
                 'height_meters' => 'sometimes|nullable|integer|min:0',
                 'location' => 'sometimes|nullable|string|max:255',
                 'min_people' => 'sometimes|required|integer|min:1',
-                'max_people' => 'sometimes|required|integer|min:1',
+                'max_people' => 'sometimes|required|integer|min:1|gte:min_people',
                 'overview' => 'sometimes|nullable|string',
                 'card_highlights' => 'sometimes|nullable|array',
-                'card_highlights.*' => 'string',
+                'card_highlights.*' => 'string|max:255',
                 'detailed_highlights' => 'sometimes|nullable|array',
-                'detailed_highlights.*' => 'string',
+                'detailed_highlights.*' => 'string|max:255',
                 'itinerary' => 'sometimes|nullable|array',
-                'itinerary.*.day' => 'required|string|max:255',
-                'itinerary.*.description' => 'required|string',
-                'map_url' => 'sometimes|nullable|array',
-                'map_url.url' => 'nullable|url',
-                'map_url.iframe' => 'nullable|string',
+                'itinerary.*.day' => 'required_with:itinerary|string|max:255',
+                'itinerary.*.description' => 'required_with:itinerary|string',
+                'map_url' => 'sometimes|nullable|url',
+             'map' => [
+    'nullable',
+    'string',
+    function ($attribute, $value, $fail) {
+        // Check if it's a valid URL
+        if (filter_var($value, FILTER_VALIDATE_URL)) {
+            if (!str_contains($value, 'google.com/maps')) {
+                $fail("The $attribute must be a valid Google Maps URL.");
+            }
+            return;
+        }
+
+        // Check if it's a valid iframe
+        if (!preg_match('/^<iframe\s+[^>]*src=["\']https:\/\/www\.google\.com\/maps\/embed\/?.*?["\'][^>]*>.*<\/iframe>$/i', $value)) {
+            $fail("The $attribute must be a valid Google Maps embed iframe or URL.");
+        }
+    },
+],
+
+
                 'includes' => 'sometimes|nullable|array',
-                'includes.*' => 'string',
+                'includes.*' => 'string|max:255',
                 'excludes' => 'sometimes|nullable|array',
-                'excludes.*' => 'string',
+                'excludes.*' => 'string|max:255',
                 'faqs' => 'sometimes|nullable|array',
-                'faqs.*.question' => 'required|string',
-                'faqs.*.answer' => 'required|string',
+                'faqs.*.question' => 'required_with:faqs|string|max:255',
+                'faqs.*.answer' => 'required_with:faqs|string',
                 'images' => 'sometimes|array',
                 'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:512',
                 'deleted_images' => 'sometimes|array',
                 'deleted_images.*' => 'integer|exists:tour_package_images,id',
                 'status_id' => 'sometimes|required|in:4,5',
             ]);
-
-            // Sanitize iframe in map_url if present
-            if (isset($validated['map_url']['iframe'])) {
-                $validated['map_url']['iframe'] = Purify::clean($validated['map_url']['iframe']);
-            }
 
             DB::beginTransaction();
 

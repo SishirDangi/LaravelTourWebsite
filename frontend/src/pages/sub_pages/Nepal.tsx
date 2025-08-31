@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { motion } from 'framer-motion'
 import Everest from '../../components/Trekking region/Everest'
 import Annapurna from '../../components/Trekking region/Annapurna'
