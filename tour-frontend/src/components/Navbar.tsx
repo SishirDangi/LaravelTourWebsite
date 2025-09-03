@@ -253,20 +253,7 @@ const Navbar: React.FC = () => {
         },
       ],
     },
-    {
-      label: 'Peak Climbing',
-      subpages: [
-        { path: '/peakclimbing/island-peak', label: 'Island Peak (Imja Tse)' },
-        { path: '/peakclimbing/mera-peak', label: 'Mera Peak Climb' },
-        { path: '/peakclimbing/lobuche-east-peak', label: 'Lobuche East Peak' },
-        { path: '/peakclimbing/pisang-peak', label: 'Pisang Peak Climb' },
-        {
-          path: '/peakclimbing/chulu-east-peak',
-          label: 'Chulu East Peak Climb',
-        },
-        { path: '/peakclimbing/yala-peak', label: 'Yala Peak Climb' },
-      ],
-    },
+    { path: '/populartours', label: 'Popular Tours' },
     {
       label: 'Tour',
       subpages: [
@@ -298,9 +285,9 @@ const Navbar: React.FC = () => {
         },
       ],
     },
-    { path: '/about', label: 'About Us' },
+    { path: '/aboutus', label: 'About Us' },
     { path: '/blog', label: 'Blog' },
-    { path: '/contact', label: 'Contact' },
+    { path: '/contact', label: 'Contact Us' },
   ];
 
   const isActive = (path: string): boolean => location.pathname === path;
@@ -406,10 +393,10 @@ const Navbar: React.FC = () => {
             )}
 
             <Link
-              to="/contact"
+              to="/enquirynow"
               className="bg-white text-orange-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 sm:ml-4 text-sm md:text-base"
             >
-              Book Now
+              Enquiry Now
             </Link>
           </div>
 

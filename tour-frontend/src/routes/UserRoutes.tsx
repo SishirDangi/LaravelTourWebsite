@@ -14,6 +14,8 @@ import PackageDetails from "../components/PackageDetails";
 import BookingForm from "../components/BookingForm";
 import PopularTour from "../components/PopularTour";
 import Home from "../components/Home";
+import ScrollToTopButton from "../components/ScrollToTopButton";
+import EnquiryNow from "../components/EnquiryNow";
 
 
 // Lazy-loaded page component
@@ -24,6 +26,7 @@ const UserRoutes: React.FC = () => {
   return (
     <>
       <ScrollToTop />
+      <ScrollToTopButton />
       <Header />
       <Suspense
   fallback={
@@ -49,17 +52,19 @@ const UserRoutes: React.FC = () => {
     </div>
   }
 >
+  
         <Routes>
           {/* <Route path="/register" element={<Register />} /> */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/blog" element={<BlogPage />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/aboutus" element={<About />} />
           <Route path="/destination" element={<Destination />} />
           <Route path="/packages/:id" element={<PackageDetails />} />
           <Route path="/booking/:id" element={<BookingForm />} />
           <Route path="/populartours" element={<PopularTour />} />
+          <Route path="/enquirynow" element={<EnquiryNow />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
