@@ -62,8 +62,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   const menuItems: MenuItem[] = [
     { label: "Home", icon: <FaHome />, path: "/admin-dashboard" },
     { label: "Blogs", icon: <FaBook />, path: "/admin-dashboard/blogs" },
-    { label: "Messages", icon: <FaEnvelope />, path: "/admin-dashboard/admincontact" },
-    { label: "Tour Package", icon: <FaEnvelope />, path: "/admin-dashboard/admintourpackage" },
+    { label: "Messages", icon: <FaEnvelope />, path: "/admin-dashboard/admincontacts" },
+    { label: "Tour Bookings", icon: <FaEnvelope />, path: "/admin-dashboard/adminbookings" },
+    { label: "Tour Package", icon: <FaEnvelope />, path: "/admin-dashboard/admintourpackages" },
   ];
 
   return (

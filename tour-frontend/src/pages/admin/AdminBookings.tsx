@@ -7,16 +7,30 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const statusLabels: { [key: number]: string } = {
   1: "Pending",
-  2: "Checked",
+  2: "Confirmed",
+  3: "Cancelled",
 };
 
-interface Message {
+interface TourPackage {
   id: number;
   name: string;
+  max_people: number;
+}
+
+interface Status {
+  id: number;
+  name: string;
+}
+
+interface BookTour {
+  id: number;
+  full_name: string;
   email: string;
-  phone: string | null;
-  message: string;
-  status_id: number;
+  phone_number: string;
+  no_of_persons: number;
+  tour_date: string | null;
+  tour_package: TourPackage;
+  status: Status;
   created_at: string;
 }
 
@@ -27,7 +41,18 @@ interface CustomSelectProps {
   onChange: (value: string) => void;
 }
 
-function formatDateTime(dateString: string): string {
+function formatDate(dateString: string | null): string {
+  if (!dateString) return "-";
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+}
+
+function formatDateTime(dateString: string | null): string {
+  if (!dateString) return "-";
   const options: Intl.DateTimeFormatOptions = {
     year: "numeric",
     month: "short",
@@ -111,8 +136,8 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ label, options, value, onCh
   );
 };
 
-const AdminMessages: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+const AdminBookings: React.FC = () => {
+  const [bookings, setBookings] = useState<BookTour[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updatingId, setUpdatingId] = useState<number | null>(null);
@@ -123,41 +148,42 @@ const AdminMessages: React.FC = () => {
   const [dateTo, setDateTo] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date_desc");
-  const [modalMessage, setModalMessage] = useState<Message | null>(null);
+  const [modalBooking, setModalBooking] = useState<BookTour | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
 
-  const fetchMessages = async () => {
+  const fetchBookings = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE_URL}/contact-messages`);
+      const res = await fetch(`${API_BASE_URL}/book-tours`);
       if (!res.ok) throw new Error("Failed to fetch");
-      const data: Message[] = await res.json();
-      setMessages(data);
+      const response = await res.json();
+      setBookings(response.data);
       setError("");
     } catch {
-      setError("Failed to load messages.");
-      toast.error("Failed to load messages.");
+      setError("Failed to load bookings.");
+      toast.error("Failed to load bookings.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchMessages();
+    fetchBookings();
   }, []);
 
-  const updateStatus = async (id: number, newStatusId: number) => {
+  const updateStatus = async (id: number, currentStatusId: number) => {
+    const newStatusId = currentStatusId === 1 ? 2 : currentStatusId === 2 ? 3 : 1;
     setUpdatingId(id);
     try {
-      const res = await fetch(`${API_BASE_URL}/contact-messages/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/book-tours/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status_id: newStatusId }),
       });
       if (!res.ok) throw new Error("Failed to update status");
-      const updatedMessage = await res.json();
-      setMessages((prev) =>
-        prev.map((msg) => (msg.id === id ? updatedMessage.data : msg))
+      const updatedBooking = await res.json();
+      setBookings((prev) =>
+        prev.map((booking) => (booking.id === id ? updatedBooking.data : booking))
       );
       toast.success("Status updated successfully");
     } catch {
@@ -167,67 +193,76 @@ const AdminMessages: React.FC = () => {
     }
   };
 
-  const deleteMessage = async (id: number) => {
+  const deleteBooking = async (id: number) => {
     setDeletingId(id);
     try {
-      const res = await fetch(`${API_BASE_URL}/contact-messages/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/book-tours/${id}`, {
         method: "DELETE",
       });
-      if (!res.ok) throw new Error("Failed to delete message");
-      setMessages((prev) => prev.filter((msg) => msg.id !== id));
-      toast.success("Message deleted successfully");
+      if (!res.ok) throw new Error("Failed to delete booking");
+      setBookings((prev) => prev.filter((booking) => booking.id !== id));
+      toast.success("Booking deleted successfully");
     } catch {
-      toast.error("Error deleting message");
+      toast.error("Error deleting booking");
     } finally {
       setDeletingId(null);
     }
   };
 
-  const filteredMessages = useMemo(() => {
-    return messages.filter((msg) => {
+  const filteredBookings = useMemo(() => {
+    return bookings.filter((booking) => {
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch =
-        msg.name.toLowerCase().includes(searchLower) ||
-        msg.email.toLowerCase().includes(searchLower) ||
-        (msg.phone && msg.phone.toLowerCase().includes(searchLower));
+        booking.full_name.toLowerCase().includes(searchLower) ||
+        booking.email.toLowerCase().includes(searchLower) ||
+        booking.phone_number.toLowerCase().includes(searchLower) ||
+        booking.tour_package.name.toLowerCase().includes(searchLower);
 
-      const msgDate = new Date(msg.created_at);
+      const bookingDate = booking.tour_date ? new Date(booking.tour_date) : null;
       const fromDate = dateFrom ? new Date(dateFrom) : null;
       const toDate = dateTo ? new Date(dateTo) : null;
 
-      const afterFrom = fromDate ? msgDate >= fromDate : true;
-      const beforeTo = toDate ? msgDate <= new Date(toDate.getTime() + 86400000) : true;
+      const afterFrom = fromDate && bookingDate ? bookingDate >= fromDate : true;
+      const beforeTo = toDate && bookingDate ? bookingDate <= new Date(toDate.getTime() + 86400000) : true;
 
-      const matchesStatus = statusFilter === "all" || String(msg.status_id) === statusFilter;
+      const matchesStatus = statusFilter === "all" || String(booking.status.id) === statusFilter;
 
       return matchesSearch && afterFrom && beforeTo && matchesStatus;
     });
-  }, [messages, searchTerm, dateFrom, dateTo, statusFilter]);
+  }, [bookings, searchTerm, dateFrom, dateTo, statusFilter]);
 
-  const sortedMessages = useMemo(() => {
-    const msgs = [...filteredMessages];
+  const sortedBookings = useMemo(() => {
+    const bookingsList = [...filteredBookings];
 
     switch (sortBy) {
       case "date_asc":
-        msgs.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        bookingsList.sort((a, b) => {
+          const dateA = a.tour_date ? new Date(a.tour_date).getTime() : 0;
+          const dateB = b.tour_date ? new Date(b.tour_date).getTime() : 0;
+          return dateA - dateB;
+        });
         break;
       case "name_asc":
-        msgs.sort((a, b) => a.name.localeCompare(b.name));
+        bookingsList.sort((a, b) => a.full_name.localeCompare(b.full_name));
         break;
       case "name_desc":
-        msgs.sort((a, b) => b.name.localeCompare(a.name));
+        bookingsList.sort((a, b) => b.full_name.localeCompare(a.full_name));
         break;
       case "date_desc":
       default:
-        msgs.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        bookingsList.sort((a, b) => {
+          const dateA = a.tour_date ? new Date(a.tour_date).getTime() : 0;
+          const dateB = b.tour_date ? new Date(b.tour_date).getTime() : 0;
+          return dateB - dateA;
+        });
         break;
     }
 
-    return msgs;
-  }, [filteredMessages, sortBy]);
+    return bookingsList;
+  }, [filteredBookings, sortBy]);
 
-  const totalPages = Math.ceil(sortedMessages.length / ITEMS_PER_PAGE);
-  const paginatedMessages = sortedMessages.slice(
+  const totalPages = Math.ceil(sortedBookings.length / ITEMS_PER_PAGE);
+  const paginatedBookings = sortedBookings.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
@@ -237,17 +272,18 @@ const AdminMessages: React.FC = () => {
     setCurrentPage(page);
   };
 
-  const closeModal = () => setModalMessage(null);
+  const closeModal = () => setModalBooking(null);
 
   const statusOptions = [
     { value: "all", label: "All Statuses" },
     { value: "1", label: "Pending" },
-    { value: "2", label: "Checked" },
+    { value: "2", label: "Confirmed" },
+    { value: "3", label: "Cancelled" },
   ];
 
   const sortOptions = [
-    { value: "date_desc", label: "Date: Newest First" },
-    { value: "date_asc", label: "Date: Oldest First" },
+    { value: "date_desc", label: "Tour Date: Newest First" },
+    { value: "date_asc", label: "Tour Date: Oldest First" },
     { value: "name_asc", label: "Name: A-Z" },
     { value: "name_desc", label: "Name: Z-A" },
   ];
@@ -270,7 +306,7 @@ const AdminMessages: React.FC = () => {
     <div className="max-w-7xl mx-auto p-6">
       <ToastContainer position="top-right" autoClose={5000} />
       <h1 className="text-3xl text-center font-semibold font-['Winky_Rough',sans-serif] mb-6 text-orange-500">
-        Contact Messages
+        Tour Bookings
       </h1>
 
       {/* Search bar full width */}
@@ -278,7 +314,7 @@ const AdminMessages: React.FC = () => {
         <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
         <input
           type="text"
-          placeholder="Search by Name, Email, Phone"
+          placeholder="Search by Name, Email, Phone, or Tour Package"
           value={searchTerm}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setSearchTerm(e.target.value);
@@ -354,54 +390,51 @@ const AdminMessages: React.FC = () => {
               <th className="p-3 text-left">Name</th>
               <th className="p-3 text-left">Email</th>
               <th className="p-3 text-left">Phone</th>
-              <th className="p-3 text-left">Message</th>
-              <th className="p-3 text-left">Sent At</th>
+              <th className="p-3 text-left">Tour Package</th>
+              <th className="p-3 text-left">Persons</th>
+              <th className="p-3 text-left">Tour Date</th>
               <th className="p-3 text-left">Status</th>
               <th className="p-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {paginatedMessages.map((msg, index) => (
+            {paginatedBookings.map((booking, index) => (
               <tr
-                key={msg.id}
+                key={booking.id}
                 onClick={(e) => {
-                  // Prevent modal from opening if clicking on buttons
                   if ((e.target as HTMLElement).closest("button")) return;
-                  setModalMessage(msg);
+                  setModalBooking(booking);
                 }}
                 className="border-b border-gray-200 hover:bg-gray-100 transition cursor-pointer"
               >
                 <td className="p-3">
                   {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
                 </td>
-                <td className="p-3 max-w-[150px] break-words">{msg.name}</td>
-                <td className="p-3 max-w-[180px] break-words">{msg.email}</td>
-                <td className="p-3">{msg.phone || "-"}</td>
-                <td className="p-3 max-w-[300px] break-words">
-                  {msg.message.length > 100
-                    ? msg.message.slice(0, 100) + "..."
-                    : msg.message}
-                </td>
-                <td className="p-3">{formatDateTime(msg.created_at)}</td>
+                <td className="p-3 max-w-[150px] break-words">{booking.full_name}</td>
+                <td className="p-3 max-w-[180px] break-words">{booking.email}</td>
+                <td className="p-3">{booking.phone_number}</td>
+                <td className="p-3 max-w-[200px] break-words">{booking.tour_package.name}</td>
+                <td className="p-3">{booking.no_of_persons}</td>
+                <td className="p-3">{formatDate(booking.tour_date)}</td>
                 <td className="p-3 text-center">
                   <button
-                    disabled={updatingId === msg.id}
-                    onClick={() =>
-                      updateStatus(msg.id, msg.status_id === 1 ? 2 : 1)
-                    }
+                    disabled={updatingId === booking.id}
+                    onClick={() => updateStatus(booking.id, booking.status.id)}
                     className={`px-3 py-1 rounded font-semibold text-white transition ${
-                      msg.status_id === 1
+                      booking.status.id === 1
                         ? "bg-red-600 hover:bg-red-700"
-                        : "bg-green-600 hover:bg-green-700"
+                        : booking.status.id === 2
+                        ? "bg-green-600 hover:bg-green-700"
+                        : "bg-gray-600 hover:bg-gray-700"
                     }`}
                   >
-                    {statusLabels[msg.status_id]}
+                    {statusLabels[booking.status.id]}
                   </button>
                 </td>
                 <td className="p-3 text-center">
                   <button
-                    disabled={deletingId === msg.id}
-                    onClick={() => setDeleteConfirmId(msg.id)}
+                    disabled={deletingId === booking.id}
+                    onClick={() => setDeleteConfirmId(booking.id)}
                     className="px-3 py-1 rounded text-sm font-semibold border border-red-600 text-red-600 hover:bg-red-50 transition"
                   >
                     Delete
@@ -413,9 +446,9 @@ const AdminMessages: React.FC = () => {
         </table>
       </div>
 
-      {/* No Messages Found */}
-      {paginatedMessages.length === 0 && (
-        <p className="mt-4 text-center text-gray-600">No messages found.</p>
+      {/* No Bookings Found */}
+      {paginatedBookings.length === 0 && (
+        <p className="mt-4 text-center text-gray-600">No bookings found.</p>
       )}
 
       {/* Pagination */}
@@ -451,8 +484,8 @@ const AdminMessages: React.FC = () => {
         </div>
       )}
 
-      {/* Message Details Modal */}
-      {modalMessage && (
+      {/* Booking Details Modal */}
+      {modalBooking && (
         <div
           onClick={closeModal}
           className="fixed inset-0 bg-black/20 backdrop-blur-[1px] flex items-center justify-center z-50 p-4"
@@ -463,37 +496,40 @@ const AdminMessages: React.FC = () => {
             style={{ scrollbarWidth: "thin" /* Firefox */ }}
           >
             <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-orange-500">
-              Message Details
+              Booking Details
             </h2>
             <div className="space-y-4 flex-1">
               <div>
-                <span className="font-semibold text-gray-700 text-sm sm:text-base">Name:</span>
-                <p className="text-gray-600 break-words text-sm sm:text-base">{modalMessage.name}</p>
+                <span className="font-semibold text-gray-700 text-sm sm:text-base">Full Name:</span>
+                <p className="text-gray-600 break-words text-sm sm:text-base">{modalBooking.full_name}</p>
               </div>
               <div>
                 <span className="font-semibold text-gray-700 text-sm sm:text-base">Email:</span>
-                <p className="text-gray-600 break-words text-sm sm:text-base">{modalMessage.email}</p>
+                <p className="text-gray-600 break-words text-sm sm:text-base">{modalBooking.email}</p>
               </div>
               <div>
                 <span className="font-semibold text-gray-700 text-sm sm:text-base">Phone:</span>
-                <p className="text-gray-600 text-sm sm:text-base">{modalMessage.phone || "-"}</p>
+                <p className="text-gray-600 text-sm sm:text-base">{modalBooking.phone_number}</p>
               </div>
               <div>
-                <span className="font-semibold text-gray-700 text-sm sm:text-base">Message:</span>
-                <div
-                  className="overflow-y-auto max-h-[40vh] sm:max-h-[50vh] text-justify whitespace-pre-wrap text-gray-600 text-sm sm:text-base"
-                  style={{ scrollbarWidth: "thin" /* Firefox */ }}
-                >
-                  {modalMessage.message}
-                </div>
+                <span className="font-semibold text-gray-700 text-sm sm:text-base">Tour Package:</span>
+                <p className="text-gray-600 text-sm sm:text-base">{modalBooking.tour_package.name}</p>
               </div>
               <div>
-                <span className="font-semibold text-gray-700 text-sm sm:text-base">Sent At:</span>
-                <p className="text-gray-600 text-sm sm:text-base">{formatDateTime(modalMessage.created_at)}</p>
+                <span className="font-semibold text-gray-700 text-sm sm:text-base">Number of Persons:</span>
+                <p className="text-gray-600 text-sm sm:text-base">{modalBooking.no_of_persons}</p>
+              </div>
+              <div>
+                <span className="font-semibold text-gray-700 text-sm sm:text-base">Tour Date:</span>
+                <p className="text-gray-600 text-sm sm:text-base">{formatDate(modalBooking.tour_date)}</p>
               </div>
               <div>
                 <span className="font-semibold text-gray-700 text-sm sm:text-base">Status:</span>
-                <p className="text-gray-600 text-sm sm:text-base">{statusLabels[modalMessage.status_id]}</p>
+                <p className="text-gray-600 text-sm sm:text-base">{statusLabels[modalBooking.status.id]}</p>
+              </div>
+              <div>
+                <span className="font-semibold text-gray-700 text-sm sm:text-base">Booked At:</span>
+                <p className="text-gray-600 text-sm sm:text-base">{formatDateTime(modalBooking.created_at)}</p>
               </div>
             </div>
             <button
@@ -520,7 +556,7 @@ const AdminMessages: React.FC = () => {
               Confirm Delete
             </h3>
             <p className="text-sm sm:text-base">
-              Are you sure you want to delete this message? This action cannot be undone.
+              Are you sure you want to delete this booking? This action cannot be undone.
             </p>
             <div className="flex justify-end gap-4">
               <button
@@ -531,7 +567,7 @@ const AdminMessages: React.FC = () => {
               </button>
               <button
                 onClick={async () => {
-                  await deleteMessage(deleteConfirmId);
+                  await deleteBooking(deleteConfirmId);
                   setDeleteConfirmId(null);
                 }}
                 disabled={deletingId === deleteConfirmId}
@@ -547,4 +583,4 @@ const AdminMessages: React.FC = () => {
   );
 };
 
-export default AdminMessages;
+export default AdminBookings;

@@ -4,6 +4,7 @@ import ProtectedRoute from "../auth/ProtectedRoute";
 import AdminBlogs from "../pages/admin/AdminBlogs";
 import AdminMessages from "../pages/admin/AdminMessages";
 import AdminTourPackage from "../pages/admin/AdminTourPackage";
+import AdminBookings from "../pages/admin/AdminBookings";
 
 // Lazy load admin pages
 const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard"));
@@ -33,12 +34,13 @@ const AdminRoutes: React.FC = () => {
           <Route path="logout" element={<Logout />} />
           <Route path="adminprofile" element={<AdminProfile />} />
           <Route path="blogs" element={<AdminBlogs />} />
-          <Route path="admincontact" element={<AdminMessages />} />
-          <Route path="admintourpackage" element={<AdminTourPackage />} />
+          <Route path="admincontacts" element={<AdminMessages />} />
+          <Route path="admintourpackages" element={<AdminTourPackage />} />
+          <Route path="adminbookings" element={<AdminBookings />} />
         </Route>
       </Routes>
     </Suspense>
-  );
+  )
 };
 
 const Logout: React.FC = () => {

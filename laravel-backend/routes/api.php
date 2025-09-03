@@ -7,6 +7,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\TourPackageController;
+use App\Http\Controllers\BookTourController;
 
 Route::apiResource('users', UserController::class);
 Route::post('/login', [AuthController::class, 'login']);
@@ -54,3 +55,5 @@ Route::prefix('levels')->group(function () {
     Route::post('/', [TourPackageController::class, 'addLevel'])->name('levels.store');
     Route::delete('/{id}', [TourPackageController::class, 'deleteLevel'])->name('levels.destroy');
 });
+
+Route::apiResource('book-tours', BookTourController::class);

@@ -38,9 +38,9 @@ const BlogPage: React.FC = () => {
         }
         const data = await response.json();
         setBlogs(Array.isArray(data) ? data : []);
-        setLoading(false);
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      } finally {
         setLoading(false);
       }
     };
@@ -85,15 +85,33 @@ const BlogPage: React.FC = () => {
 
       {/* Blog Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        {/* Loading Spinner */}
         {loading ? (
-          <motion.p
-            className="text-center text-lg text-gray-600"
+          <motion.div
+            className="flex items-center justify-center min-h-[300px]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.3 }}
           >
-            Loading...
-          </motion.p>
+            <svg
+              className="animate-spin h-16 w-16 text-orange-500"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v8h8a8 8 0 01-8 8 8 8 0 01-8-8z"
+              />
+            </svg>
+          </motion.div>
         ) : error ? (
           <motion.p
             className="text-center text-lg text-red-500"
@@ -171,7 +189,7 @@ const BlogPage: React.FC = () => {
               <span>|</span>
               <span>🗓 {new Date(selectedBlog.post_date).toLocaleDateString()}</span>
             </p>
-            <div className="prose prose-lg text-gray-700 max-w-none">
+            <div className="prose prose-lg text-gray-700 max-w-none text-justify">
               {selectedBlog.content}
             </div>
           </motion.div>

@@ -1,5 +1,6 @@
+// PackageDetails.tsx
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation, Link } from "react-router-dom";
 import {
   MapPinIcon,
   TagIcon,
@@ -15,7 +16,10 @@ import {
   InformationCircleIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
+import BookingForm from "./BookingForm";
+import Footer from "./Footer";
 
 export interface TourPackage {
   id: number;
@@ -23,7 +27,7 @@ export interface TourPackage {
   destination_id: number;
   destination?: { name?: string };
   tour_type_id: number;
-  tourType?: { name?: string };
+  tour_type?: { name?: string };
   subcategory?: string | null;
   level_id: number;
   level?: { name?: string };
@@ -66,6 +70,7 @@ const sections: Section[] = [
 
 const PackageDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const [tourPackage, setTourPackage] = useState<TourPackage | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -100,6 +105,44 @@ const PackageDetails: React.FC = () => {
     }
   }, [tourPackage]);
 
+  // Scroll to BookingForm if navigated from "Book Now"
+  useEffect(() => {
+    if (!location.state?.scrollToBooking) return;
+
+    const scrollToForm = () => {
+      const bookingForm = document.getElementById("booking-form");
+      if (bookingForm) {
+        window.scrollTo({
+          top: bookingForm.offsetTop - 140, // Adjust for sticky nav
+          behavior: "smooth",
+        });
+        console.log("Scrolled to booking form");
+      } else {
+        console.warn("Booking form not found in DOM");
+      }
+    };
+
+    // Use MutationObserver to detect when booking-form is added to DOM
+    const observer = new MutationObserver(() => {
+      const bookingForm = document.getElementById("booking-form");
+      if (bookingForm) {
+        scrollToForm();
+        observer.disconnect(); // Stop observing once found
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    // Initial check in case the element is already present
+    scrollToForm();
+
+    // Cleanup observer on unmount
+    return () => observer.disconnect();
+  }, [location.state]);
+
   useEffect(() => {
     const handleScroll = () => {
       let current = "";
@@ -125,37 +168,25 @@ const PackageDetails: React.FC = () => {
     }
   };
 
-  if (loading)
+  if (loading) {
     return (
-     <div className="flex items-center justify-center h-screen w-screen bg-white">
-  <svg
-    className="animate-spin h-16 w-16 text-orange-500"
-    viewBox="0 0 24 24"
-  >
-    <circle
-      className="opacity-25"
-      cx="12"
-      cy="12"
-      r="10"
-      stroke="currentColor"
-      strokeWidth="4"
-    ></circle>
-    <path
-      className="opacity-75"
-      fill="currentColor"
-      d="M4 12a8 8 0 018-8v8h8a8 8 0 01-8 8 8 8 0 01-8-8z"
-    ></path>
-  </svg>
-</div>
-
+      <div className="flex items-center justify-center h-screen w-screen bg-white">
+        <svg className="animate-spin h-16 w-16 text-orange-500" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8h8a8 8 0 01-8 8 8 8 0 01-8-8z"></path>
+        </svg>
+      </div>
     );
-  if (error || !tourPackage)
+  }
+
+  if (error || !tourPackage) {
     return (
       <div className="text-center py-20 text-red-500 flex items-center justify-center gap-2">
         <XCircleIcon className="h-6 w-6" />
         Error: {error || "Tour package not found"}
       </div>
     );
+  }
 
   const images = tourPackage.images || [];
   const currentBgUrl =
@@ -212,7 +243,7 @@ const PackageDetails: React.FC = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="sticky top-16 z-40 bg-white border-b shadow-sm px-4 py-4">
+      <nav className="sticky top-16 z-40 bg-gray-200 border-b shadow-sm px-4 py-4">
         <ul className="flex flex-wrap gap-3 justify-center">
           {sections.map((section) => (
             <li key={section.id}>
@@ -231,6 +262,17 @@ const PackageDetails: React.FC = () => {
           ))}
         </ul>
       </nav>
+
+      {/* Back to Destination Page Button */}
+      <div className="container mx-auto max-w-6xl px-4 mt-4">
+        <Link
+          to="/destination"
+          className="inline-flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-orange-600 transition"
+        >
+          <ArrowLeftIcon className="h-5 w-5" />
+          Back to Destination Page
+        </Link>
+      </div>
 
       {/* Main Content */}
       <div className="container mx-auto max-w-6xl px-4 py-12 flex flex-col lg:flex-row gap-10">
@@ -254,7 +296,7 @@ const PackageDetails: React.FC = () => {
               </p>
               <p className="flex items-center gap-2">
                 <TagIcon className="h-5 w-5 text-orange-500" />
-                <strong>Tour Type:</strong> {tourPackage.tourType?.name || "-"}
+                <strong>Tour Type:</strong> {tourPackage.tour_type?.name || "-"}
               </p>
               {tourPackage.subcategory && (
                 <p className="flex items-center gap-2">
@@ -419,25 +461,16 @@ const PackageDetails: React.FC = () => {
         </main>
 
         {/* Sidebar */}
-        <aside className="lg:w-[350px] sticky top-28 self-start space-y-6">
-          <div className="p-6 border rounded-lg shadow-sm bg-white">
-            <h3 className="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
-              <QuestionMarkCircleIcon className="h-6 w-6 text-orange-500" />
-              Need Help?
-            </h3>
-            <p className="text-gray-800 mb-4">
-              Contact us for booking or more information.
-            </p>
-            <button className="w-full bg-orange-500 text-white py-3 px-4 rounded-lg hover:bg-orange-600 transition font-semibold">
-              Book Now
-            </button>
+        <aside className="lg:w-[350px] self-start space-y-6 sticky top-[120px]">
+          <div id="booking-form">
+            <BookingForm scrollToBooking={location.state?.scrollToBooking} />
           </div>
         </aside>
       </div>
 
       {/* Map Section */}
       {tourPackage.map_iframe && (
-        <section id="map" className="w-full py-12  scroll-mt-28">
+        <section id="map" className="w-full py-12 scroll-mt-28">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center flex items-center justify-center gap-2">
               <MapPinIcon className="h-7 w-7 text-orange-500" />
@@ -455,6 +488,7 @@ const PackageDetails: React.FC = () => {
           </div>
         </section>
       )}
+    <Footer />
     </div>
   );
 };

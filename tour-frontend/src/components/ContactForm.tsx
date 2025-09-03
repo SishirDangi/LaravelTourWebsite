@@ -137,7 +137,7 @@ const ContactForm: React.FC = () => {
                 {...register('phone', {
                   pattern: {
                     value: /^\d{7,20}$/,
-                    message: 'Phone number must be digits only and between 7 to 20 characters.',
+                    message: 'Please enter a valid phone number.',
                   },
                 })}
                 type="tel"
@@ -174,7 +174,7 @@ const ContactForm: React.FC = () => {
 
             <button
               type="submit"
-              disabled={isSubmitting} // Disable button during submission
+              disabled={isSubmitting}
               className={`w-full bg-orange-500 hover:bg-orange-700 transition-colors duration-200 text-white py-4 rounded-lg font-semibold flex items-center justify-center group ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               Send Message

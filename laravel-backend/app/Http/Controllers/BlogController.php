@@ -19,20 +19,17 @@ class BlogController extends Controller
         }, 'The :attribute must not exceed :max words.');
     }
 
-    public function index()
-    {
-        try {
-            $blogs = Blog::all();
-            if ($blogs->isEmpty()) {
-                return response()->json(['message' => 'No blogs found'], 200);
-            }
-            return response()->json($blogs);
-        } catch (QueryException $e) {
-            return response()->json(['error' => 'Failed to fetch blogs due to database error: ' . $e->getMessage()], 500);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Unexpected error while fetching blogs: ' . $e->getMessage()], 500);
-        }
+   public function index()
+{
+    try {
+        $blogs = Blog::all();
+        return response()->json($blogs); 
+    } catch (QueryException $e) {
+        return response()->json(['error' => 'Failed to fetch blogs due to database error: ' . $e->getMessage()], 500);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Unexpected error while fetching blogs: ' . $e->getMessage()], 500);
     }
+}
 
     public function show($id)
     {

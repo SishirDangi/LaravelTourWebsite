@@ -19,10 +19,15 @@ class TourPackageController extends Controller
     {
         try {
             $tourPackages = TourPackage::with(['destination', 'tourType', 'level', 'status', 'images'])->get();
-            return response()->json(['data' => $tourPackages], Response::HTTP_OK);
+            return response()->json([
+                'success' => true,
+                'data' => $tourPackages,
+                'message' => 'Tour packages retrieved successfully'
+            ], Response::HTTP_OK);
         } catch (\Exception $e) {
             \Log::error('Fetch tour packages error: ' . $e->getMessage(), ['exception' => $e]);
             return response()->json([
+                'success' => false,
                 'message' => 'Failed to fetch tour packages',
                 'error' => $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -55,9 +60,7 @@ class TourPackageController extends Controller
                 'itinerary.*.day' => 'required_with:itinerary|string|max:255',
                 'itinerary.*.description' => 'required_with:itinerary|string',
                 'map_url' => 'nullable|url',
-     'map_iframe' => 'nullable|string',
-
-                
+                'map_iframe' => 'nullable|string',
                 'includes' => 'nullable|array',
                 'includes.*' => 'string|max:255',
                 'excludes' => 'nullable|array',
@@ -142,10 +145,7 @@ class TourPackageController extends Controller
                 'itinerary.*.day' => 'required_with:itinerary|string|max:255',
                 'itinerary.*.description' => 'required_with:itinerary|string',
                 'map_url' => 'sometimes|nullable|url',
-         'map_iframe' => 'sometimes|nullable|string',
-
-
-
+                'map_iframe' => 'sometimes|nullable|string',
                 'includes' => 'sometimes|nullable|array',
                 'includes.*' => 'string|max:255',
                 'excludes' => 'sometimes|nullable|array',
@@ -162,7 +162,6 @@ class TourPackageController extends Controller
 
             DB::beginTransaction();
 
-            // Handle deleted images
             if (isset($validated['deleted_images'])) {
                 foreach ($validated['deleted_images'] as $did) {
                     $image = $tourPackage->images()->where('id', $did)->first();
@@ -175,13 +174,11 @@ class TourPackageController extends Controller
                 }
             }
 
-            // Ensure there's a main image if there are remaining images
             $remainingImages = $tourPackage->images()->get();
             if ($remainingImages->count() > 0 && !$remainingImages->contains('is_main', true)) {
                 $remainingImages->first()->update(['is_main' => true]);
             }
 
-            // Handle new images
             if ($request->hasFile('images')) {
                 $imageFiles = $request->file('images');
                 $hasNoImages = $tourPackage->images()->count() === 0;
