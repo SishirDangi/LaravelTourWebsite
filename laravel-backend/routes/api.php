@@ -8,6 +8,7 @@ use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\TourPackageController;
 use App\Http\Controllers\BookTourController;
+use App\Http\Controllers\PopularTourController;
 
 Route::apiResource('users', UserController::class);
 Route::post('/login', [AuthController::class, 'login']);
@@ -57,3 +58,6 @@ Route::prefix('levels')->group(function () {
 });
 
 Route::apiResource('book-tours', BookTourController::class);
+
+
+Route::get('/popular-tours', [PopularTourController::class, 'index']);

@@ -62,14 +62,14 @@ const services: Service[] = [
 
 const ServicesSection: React.FC = () => {
   return (
-    <section className='py-16 bg-orange-50' id='services'>
+    <section className='py-7 bg-orange-50' id='services'>
       <div className='container mx-auto px-4'>
         <motion.h2
           initial={{ opacity: 0, y: -30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className='text-3xl md:text-4xl font-bold text-center text-[#1E293B] mb-10'
+          className='text-7xl font-bold text-center mb-10 text-orange-700'
         >
           Our Trekking Services
         </motion.h2>

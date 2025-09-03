@@ -73,4 +73,14 @@ class TourPackage extends Model
     {
         return $this->hasMany(TourPackageImage::class);
     }
+    
+     public function bookTours()
+    {
+        return $this->hasMany(BookTour::class);
+    }
+
+    public function popularTour()
+    {
+        return $this->hasOne(PopularTour::class);
+    }
 }
