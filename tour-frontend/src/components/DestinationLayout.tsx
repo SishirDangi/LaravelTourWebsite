@@ -17,7 +17,7 @@ const DestinationLayout: FC<DestinationLayoutProps> = ({ children }) => {
         />
         <div className="absolute inset-0 flex flex-col justify-center items-center bg-black/30 text-white text-center space-y-3">
           <h1 className="text-5xl md:text-6xl font-serif font-bold">
-            Explore Nepal
+            Explore World
           </h1>
           <nav aria-label="Breadcrumb" className="text-base md:text-lg flex gap-2">
             <Link
@@ -32,12 +32,13 @@ const DestinationLayout: FC<DestinationLayoutProps> = ({ children }) => {
               Destination
             </span>
           </nav>
-          <p className="text-base md:text-lg text-white/90 max-w-2xl px-4">
-            Nepal is a country of natural beauty, rich culture, and adventure. Home
-            to the world’s highest peaks, including Mount Everest, it offers trekkers
-            unforgettable journeys through diverse landscapes, remote villages, and
-            spiritual heritage.
-          </p>
+        <p className="text-base md:text-lg text-white/90 max-w-4xl px-4">
+  The world is full of breathtaking beauty, diverse cultures and endless
+  adventures. From stunning landscapes and ancient wonders to vibrant
+  cities and unique traditions, every destination offers unforgettable
+  experiences and lasting memories.
+</p>
+
         </div>
       </div>
       {children}

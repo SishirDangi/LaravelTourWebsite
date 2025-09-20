@@ -4,7 +4,14 @@ import {
   HiOutlineChevronDoubleLeft,
   HiOutlineChevronDoubleRight,
 } from "react-icons/hi";
-import { FaHome, FaBook, FaEnvelope } from "react-icons/fa";
+import {
+  FaHome,
+  FaBook,
+  FaEnvelope,
+  FaQuestionCircle,
+  FaCalendarCheck,
+  FaSuitcase,
+} from "react-icons/fa";
 
 interface AdminSidebarProps {
   isCollapsed: boolean;
@@ -63,8 +70,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     { label: "Home", icon: <FaHome />, path: "/admin-dashboard" },
     { label: "Blogs", icon: <FaBook />, path: "/admin-dashboard/blogs" },
     { label: "Messages", icon: <FaEnvelope />, path: "/admin-dashboard/admincontacts" },
-    { label: "Tour Bookings", icon: <FaEnvelope />, path: "/admin-dashboard/adminbookings" },
-    { label: "Tour Package", icon: <FaEnvelope />, path: "/admin-dashboard/admintourpackages" },
+    { label: "Enquiry", icon: <FaQuestionCircle />, path: "/admin-dashboard/adminenquiry" },
+    { label: "Tour Bookings", icon: <FaCalendarCheck />, path: "/admin-dashboard/adminbookings" },
+    { label: "Tour Package", icon: <FaSuitcase />, path: "/admin-dashboard/admintourpackages" },
+     { label: "Live Messages", icon: <FaSuitcase />, path: "/admin-dashboard/adminlivemessages" },
   ];
 
   return (

@@ -171,7 +171,7 @@ const About: React.FC = () => {
   ];
 
   return (
-    <div className='pt-16 overflow-x-hidden'>
+    <div className='pt-0 overflow-x-hidden'>
       {/* Header Section */}
       <section className="w-full font-sans">
         <div className="relative w-full h-[300px] md:h-[400px]">

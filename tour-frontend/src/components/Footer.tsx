@@ -1,21 +1,20 @@
 import React, { useEffect, useState } from "react";
-import {
-  Mountain,
-  Phone,
-  Mail,
-  MapPin,
-  Facebook,
-  Instagram,
-  Twitter,
-} from "lucide-react";
 import { Link } from "react-router-dom";
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaRegCopyright,
+  FaAngleRight,
+} from "react-icons/fa";
+import { SiTiktok } from "react-icons/si";
+import SubscribeForm from "./SubscribeForm";
 import axios from "axios";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
 interface PopularTour {
   id: number;
-  tour_package: {
+  tour_package?: {
     id: number;
     name: string;
   };
@@ -25,115 +24,213 @@ const Footer: React.FC = () => {
   const [popularTours, setPopularTours] = useState<PopularTour[]>([]);
 
   useEffect(() => {
-    const cached = localStorage.getItem("popularTours");
+    const cached = sessionStorage.getItem("popularTours");
 
     if (cached) {
-      // ✅ Load from cache
-      setPopularTours(JSON.parse(cached));
+      const parsedTours = JSON.parse(cached);
+      console.log("Cached Tours:", parsedTours);
+      const validTours = parsedTours.filter(
+        (tour: PopularTour) => tour.tour_package && tour.tour_package.id && tour.tour_package.name
+      );
+      setPopularTours(validTours);
+      if (validTours.length !== parsedTours.length) {
+        console.warn("Invalid cached tours detected, refetching data");
+        sessionStorage.removeItem("popularTours");
+        fetchPopularTours();
+      }
     } else {
-      // ✅ Fetch only if no cache
-      const fetchPopularTours = async () => {
-        try {
-          const response = await axios.get(`${API_BASE}/popular-tours`);
-          if (response.data.success) {
-            const filtered = response.data.data
-              .filter((tour: PopularTour) => tour.tour_package)
-              .slice(0, 5);
-
-            setPopularTours(filtered);
-
-            // Save to cache
-            localStorage.setItem("popularTours", JSON.stringify(filtered));
-          }
-        } catch (error) {
-          console.error("Error fetching popular tours:", error);
-        }
-      };
-
       fetchPopularTours();
     }
   }, []);
 
+  const fetchPopularTours = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/popular-tours`);
+      console.log("API Response:", response.data);
+      if (response.data.success) {
+        const filtered = response.data.data
+          .filter((tour: PopularTour) => tour.tour_package && tour.tour_package.id && tour.tour_package.name)
+          .slice(0, 5);
+        console.log("Filtered Tours:", filtered);
+        setPopularTours(filtered);
+        sessionStorage.setItem("popularTours", JSON.stringify(filtered));
+      }
+    } catch (error) {
+      console.error("Error fetching popular tours:", error);
+    }
+  };
+
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center sm:text-left">
-          
-          {/* Company Info */}
-          <div className="flex flex-col items-center sm:items-start space-y-3 sm:space-y-4">
-            <div className="flex items-center justify-center sm:justify-start space-x-2">
-              <Mountain className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400" />
-              <span className="text-lg sm:text-xl font-bold">Himalaya Trekking</span>
-            </div>
-            <p className="text-gray-300 text-xs sm:text-sm leading-relaxed max-w-xs sm:max-w-none text-justify sm:text-left">
-              Experience the majestic beauty of Nepal's Himalayas with our expert
-              guides and carefully crafted trekking packages.
-            </p>
-            <div className="flex space-x-4 justify-center sm:justify-start">
-              <Facebook className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 hover:text-blue-400 cursor-pointer transition-colors" />
-              <Instagram className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 hover:text-pink-400 cursor-pointer transition-colors" />
-              <Twitter className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 hover:text-blue-400 cursor-pointer transition-colors" />
-            </div>
-          </div>
+    <footer className="font-sans bg-gradient-to-b from-gray-900 to-gray-800 text-white px-6 md:px-16 lg:px-24 py-16 shadow-lg">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+        {/* Column 1: Useful Links */}
+        <div className="flex flex-col items-center md:items-start space-y-6">
+          <h2 className="text-2xl font-bold tracking-tight text-orange-700">
+            Useful Links
+          </h2>
+          <ul className="space-y-3 text-gray-300">
+            {[
+              { label: "Home", to: "/" },
+              { label: "Destination", to: "/destination" },
+              { label: "About Us", to: "/aboutus" },
+              { label: "Blog", to: "/blog" },
+              { label: "Contact Us", to: "/contact" },
+              { label: "Popular Tours", to: "/populartours" },
+            ].map(({ label, to }) => (
+              <li key={label}>
+                <Link
+                  to={to}
+                  className="group flex items-center gap-2 text-base font-medium hover:text-orange-700 transition-all duration-300 ease-in-out transform hover:translate-x-2"
+                >
+                  <FaAngleRight className="text-orange-700 group-hover:text-orange-600 transition-colors duration-300" />
+                  {label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-          {/* Quick Links */}
-          <div className="flex flex-col items-center sm:items-start space-y-3 sm:space-y-4">
-            <h3 className="text-base sm:text-lg font-semibold">Quick Links</h3>
-            <ul className="space-y-2">
-              <li><Link to="/" className="text-gray-300 hover:text-white transition-colors text-xs sm:text-sm">Home</Link></li>
-              <li><Link to="/destination" className="text-gray-300 hover:text-white transition-colors text-xs sm:text-sm">Destination</Link></li>
-              <li><Link to="/aboutus" className="text-gray-300 hover:text-white transition-colors text-xs sm:text-sm">About Us</Link></li>
-              <li><Link to="/blog" className="text-gray-300 hover:text-white transition-colors text-xs sm:text-sm">Blog</Link></li>
-              <li><Link to="/contact" className="text-gray-300 hover:text-white transition-colors text-xs sm:text-sm">Contact Us</Link></li>
-            </ul>
-          </div>
-
-          {/* Popular Packages (Dynamic) */}
-          <div className="flex flex-col items-center sm:items-start space-y-3 sm:space-y-4">
-            <h3 className="text-base sm:text-lg font-semibold">Popular Packages</h3>
-            <ul className="space-y-2">
-              {popularTours.length > 0 ? (
-                popularTours.map((tour) => (
+        {/* Column 2: Popular Tours */}
+        <div className="flex flex-col items-center md:items-start space-y-6">
+          <h2 className="text-2xl font-bold tracking-tight text-orange-700">
+            Popular Tours
+          </h2>
+          <ul className="space-y-3 text-gray-300">
+            {popularTours.length > 0 ? (
+              popularTours.map((tour) => {
+                if (!tour.tour_package?.id || !tour.tour_package?.name) {
+                  console.warn("Invalid tour package:", tour);
+                  return null;
+                }
+                return (
                   <li key={tour.id}>
                     <Link
                       to={`/packages/${tour.tour_package.id}`}
-                      className="text-gray-300 hover:text-white transition-colors text-xs sm:text-sm"
+                      className="group flex items-center gap-2 text-base font-medium hover:text-orange-700 transition-all duration-300 ease-in-out transform hover:translate-x-2"
                     >
+                      <FaAngleRight className="text-orange-700 group-hover:text-orange-600 transition-colors duration-300" />
                       {tour.tour_package.name}
                     </Link>
                   </li>
-                ))
-              ) : (
-                <li className="text-gray-400 text-xs">No packages found</li>
-              )}
-            </ul>
-          </div>
+                );
+              })
+            ) : (
+              <li className="text-gray-500 italic">No packages found</li>
+            )}
+          </ul>
+        </div>
 
-          {/* Contact Info */}
-          <div className="flex flex-col items-center sm:items-start space-y-3 sm:space-y-4">
-            <h3 className="text-base sm:text-lg font-semibold">Contact Info</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-center sm:justify-start space-x-3">
-                <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400 flex-shrink-0" />
-                <span className="text-gray-300 text-xs sm:text-sm">Thamel, Kathmandu, Nepal</span>
-              </div>
-              <div className="flex items-center justify-center sm:justify-start space-x-3">
-                <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400 flex-shrink-0" />
-                <span className="text-gray-300 text-xs sm:text-sm">+977-1-4123456</span>
-              </div>
-              <div className="flex items-center justify-center sm:justify-start space-x-3">
-                <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400 flex-shrink-0" />
-                <span className="text-gray-300 text-xs sm:text-sm">info@himalayatrekking.com</span>
-              </div>
-            </div>
+        {/* Column 3: Logo and Contact Info */}
+        <div className="flex flex-col items-center text-center space-y-1">
+          <img
+            src="Logo.png"
+            alt="Himalaya Trekking Logo"
+            className="w-34 h-auto transition-transform duration-300 hover:scale-105"
+          />
+          <div className="leading-tight">
+            <h2 className="text-4xl font-extrabold tracking-wider text-white font-['Winky_Rough',sans-serif]">
+              HIMALAYA
+            </h2>
+            <p className="text-2xl tracking-wider font-medium text-orange-700 font-['Winky_Rough',sans-serif]">
+              TREKKING
+            </p>
+          </div>
+          <div className="space-y-2">
+            <p className="text-xl font-bold text-orange-700 tracking-tight">
+              Location
+            </p>
+            <p className="text-base text-gray-300">Thamel, Kathmandu, Nepal</p>
+          </div>
+          <div className="space-y-2">
+            <p className="text-xl font-bold text-orange-700 tracking-tight">
+              Get in Touch
+            </p>
+            <p className="text-base text-gray-300">
+              <a href="tel:+97714123456" className="hover:text-orange-700 transition-colors duration-300">
+                +977-1-4123456
+              </a>
+            </p>
+            <a
+              href="mailto:info@himalayatrekking.com"
+              className="text-base text-gray-300 hover:text-orange-700 transition-colors duration-300"
+            >
+              info@himalayatrekking.com
+            </a>
           </div>
         </div>
 
-        {/* Bottom Section */}
-        <div className="border-t border-gray-800 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center">
-          <p className="text-gray-400 text-xs sm:text-sm">
-            © 2025 Himalaya Trekking. All rights reserved. | Designed and developed by Amit
+        {/* Column 4: Subscribe and Socials */}
+        <div className="flex flex-col items-center md:items-start space-y-6">
+          <h2 className="text-2xl font-bold tracking-tight text-orange-700">
+            Stay Connected
+          </h2>
+          <p className="text-base text-gray-300">
+            Subscribe for exclusive offers and updates
           </p>
+          <div className="w-full max-w-sm">
+            <SubscribeForm />
+          </div>
+          <div className="space-y-3">
+            <h3 className="text-xl font-bold text-orange-700 tracking-tight">
+              Follow Us
+            </h3>
+            <div className="flex space-x-6 text-2xl justify-center md:justify-start">
+              <a
+                href="https://www.facebook.com/himalayatrekking"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-all duration-300 hover:text-orange-700 hover:scale-110"
+              >
+                <FaFacebookF />
+              </a>
+              <a
+                href="https://www.instagram.com/himalayatrekking"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-all duration-300 hover:text-orange-700 hover:scale-110"
+              >
+                <FaInstagram />
+              </a>
+              <a
+                href="https://www.tiktok.com/@himalayatrekking"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-all duration-300 hover:text-orange-700 hover:scale-110"
+              >
+                <SiTiktok />
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Bar */}
+      <div className="mt-12 pt-6 border-t border-gray-700">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-400">
+          <p className="flex items-center gap-2">
+            <FaRegCopyright />
+            {new Date().getFullYear()} Himalaya Trekking. All rights reserved.
+          </p>
+          <div className="flex space-x-6">
+            <Link
+              to="/terms"
+              className="hover:text-orange-700 transition-all duration-300"
+            >
+              Terms & Conditions
+            </Link>
+            <Link
+              to="/privacypolicy"
+              className="hover:text-orange-700 transition-all duration-300"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              to="/faqs"
+              className="hover:text-orange-700 transition-all duration-300"
+            >
+              FAQ
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

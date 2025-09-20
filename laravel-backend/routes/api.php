@@ -9,6 +9,8 @@ use App\Http\Controllers\StatusController;
 use App\Http\Controllers\TourPackageController;
 use App\Http\Controllers\BookTourController;
 use App\Http\Controllers\PopularTourController;
+use App\Http\Controllers\EnquiryController;
+use App\Http\Controllers\LiveMessageController;
 
 Route::apiResource('users', UserController::class);
 Route::post('/login', [AuthController::class, 'login']);
@@ -61,3 +63,7 @@ Route::apiResource('book-tours', BookTourController::class);
 
 
 Route::get('/popular-tours', [PopularTourController::class, 'index']);
+
+Route::apiResource('enquiries', EnquiryController::class);
+
+Route::apiResource('live-messages', LiveMessageController::class);

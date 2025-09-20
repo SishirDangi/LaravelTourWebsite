@@ -22,8 +22,8 @@ const AdventurePicker: React.FC = () => {
         if (result.success) {
           let packages = result.data
 
-          // Check if we have a saved order in localStorage
-          const savedOrder = localStorage.getItem('tourPackagesOrder')
+          // Check if we have a saved order in sessionStorage
+          const savedOrder = sessionStorage.getItem('tourPackagesOrder')
           if (savedOrder) {
             // Use saved order
             const order = JSON.parse(savedOrder)
@@ -36,7 +36,7 @@ const AdventurePicker: React.FC = () => {
             packages = packages
               .sort(() => Math.random() - 0.5)
               .slice(0, 5) // Limit to 5 packages
-            localStorage.setItem(
+            sessionStorage.setItem(
               'tourPackagesOrder',
               JSON.stringify(packages.map((p: TourPackage) => p.id))
             )
@@ -57,7 +57,28 @@ const AdventurePicker: React.FC = () => {
   }, [])
 
   if (loading) {
-    return <div className='text-center p-6'>Loading...</div>
+    return (
+      <div className="flex items-center justify-center min-h-[300px] w-full">
+        <svg
+          className="animate-spin h-16 w-16 text-orange-500"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v8h8a8 8 0 01-8 8 8 8 0 01-8-8z"
+          ></path>
+        </svg>
+      </div>
+    )
   }
 
   if (error) {
@@ -66,7 +87,7 @@ const AdventurePicker: React.FC = () => {
 
   return (
     <div className='p-6'>
-      <h1 className='text-7xl font-bold text-center mt-5 mb-10 text-orange-700'>
+      <h1 className='text-5xl font-bold text-center mt-5 mb-10 text-orange-700'>
         Pick your Adventures
       </h1>
 

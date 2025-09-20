@@ -22,7 +22,7 @@ const CallToAction: React.FC = () => {
         transition={{ duration: 1 }}
       >
         <motion.h2
-          className='text-4xl sm:text-5xl font-bold mb-4'
+          className='text-5xl sm:text-5xl font-bold mb-4'
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}

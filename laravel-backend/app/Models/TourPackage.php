@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,8 +27,6 @@ class TourPackage extends Model
         'card_highlights',
         'detailed_highlights',
         'itinerary',
-        'map_url',       
-        'map_iframe',    
         'includes',
         'excludes',
         'faqs',
@@ -41,12 +40,12 @@ class TourPackage extends Model
         'min_people' => 'integer',
         'max_people' => 'integer',
         'duration_days' => 'integer',
-        'card_highlights' => 'array',       // JSON → array
-        'detailed_highlights' => 'array',   // JSON → array
-        'itinerary' => 'array',             // JSON → array
-        'includes' => 'array',              // JSON → array
-        'excludes' => 'array',              // JSON → array
-        'faqs' => 'array',                  // JSON → array
+        'card_highlights' => 'array',
+        'detailed_highlights' => 'array',
+        'itinerary' => 'array',
+        'includes' => 'array',
+        'excludes' => 'array',
+        'faqs' => 'array',
     ];
 
     public function destination()
@@ -73,8 +72,13 @@ class TourPackage extends Model
     {
         return $this->hasMany(TourPackageImage::class);
     }
-    
-     public function bookTours()
+
+    public function mapImages()
+    {
+        return $this->hasMany(TourPackageMapImage::class);
+    }
+
+    public function bookTours()
     {
         return $this->hasMany(BookTour::class);
     }

@@ -113,7 +113,7 @@ const PopularTour: React.FC = () => {
 
   return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8">
-        <h1 className='text-7xl font-bold text-center mb-10 text-orange-700'>
+        <h1 className='text-5xl font-bold text-center mb-10 text-orange-700'>
         Popular Tours
       </h1>
 

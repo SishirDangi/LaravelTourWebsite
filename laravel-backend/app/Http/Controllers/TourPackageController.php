@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\TourPackage;
@@ -6,6 +7,7 @@ use App\Models\Destination;
 use App\Models\TourType;
 use App\Models\Level;
 use App\Models\TourPackageImage;
+use App\Models\TourPackageMapImage;
 use App\Models\Status;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -18,7 +20,7 @@ class TourPackageController extends Controller
     public function index()
     {
         try {
-            $tourPackages = TourPackage::with(['destination', 'tourType', 'level', 'status', 'images'])->get();
+            $tourPackages = TourPackage::with(['destination', 'tourType', 'level', 'status', 'images', 'mapImages'])->get();
             return response()->json([
                 'success' => true,
                 'data' => $tourPackages,
@@ -59,8 +61,6 @@ class TourPackageController extends Controller
                 'itinerary' => 'nullable|array',
                 'itinerary.*.day' => 'required_with:itinerary|string|max:255',
                 'itinerary.*.description' => 'required_with:itinerary|string',
-                'map_url' => 'nullable|url',
-                'map_iframe' => 'nullable|string',
                 'includes' => 'nullable|array',
                 'includes.*' => 'string|max:255',
                 'excludes' => 'nullable|array',
@@ -70,32 +70,51 @@ class TourPackageController extends Controller
                 'faqs.*.answer' => 'required_with:faqs|string',
                 'images' => 'required|array|min:1',
                 'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:512',
+                'map_images' => 'nullable|array',
+                'map_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:512',
                 'status_id' => 'required|in:4,5',
             ]);
 
+            DB::beginTransaction();
+
             $images = $validated['images'];
-            unset($validated['images']);
+            $mapImages = $validated['map_images'] ?? [];
+            unset($validated['images'], $validated['map_images']);
 
             $tourPackage = TourPackage::create($validated);
 
+            // Handle regular images
             foreach ($images as $index => $image) {
-                $path = $image->store('uploads/tour_packages', 'public');
+                $path = $image->store('uploads/tour_packages/images', 'public');
                 $tourPackage->images()->create([
                     'image_path' => $path,
                     'is_main' => $index === 0,
                 ]);
             }
 
+            // Handle map images
+            foreach ($mapImages as $index => $mapImage) {
+                $path = $mapImage->store('uploads/tour_packages/map_images', 'public');
+                $tourPackage->mapImages()->create([
+                    'map_image_path' => $path,
+                    'is_main' => $index === 0,
+                ]);
+            }
+
+            DB::commit();
+
             return response()->json(
-                ['data' => $tourPackage->load(['destination', 'tourType', 'level', 'status', 'images'])],
+                ['data' => $tourPackage->load(['destination', 'tourType', 'level', 'status', 'images', 'mapImages'])],
                 Response::HTTP_CREATED
             );
         } catch (ValidationException $e) {
+            DB::rollBack();
             return response()->json(
                 ['message' => 'Validation failed.', 'errors' => $e->errors()],
                 Response::HTTP_UNPROCESSABLE_ENTITY
             );
         } catch (\Exception $e) {
+            DB::rollBack();
             \Log::error('Store tour package error: ' . $e->getMessage(), ['exception' => $e]);
             return response()->json(
                 ['message' => 'Failed to create tour package', 'error' => $e->getMessage()],
@@ -107,7 +126,7 @@ class TourPackageController extends Controller
     public function show($id)
     {
         try {
-            $tourPackage = TourPackage::with(['destination', 'tourType', 'level', 'status', 'images'])->findOrFail($id);
+            $tourPackage = TourPackage::with(['destination', 'tourType', 'level', 'status', 'images', 'mapImages'])->findOrFail($id);
             return response()->json(['data' => $tourPackage], Response::HTTP_OK);
         } catch (\Exception $e) {
             \Log::error('Show tour package error: ' . $e->getMessage(), ['exception' => $e]);
@@ -144,8 +163,6 @@ class TourPackageController extends Controller
                 'itinerary' => 'sometimes|nullable|array',
                 'itinerary.*.day' => 'required_with:itinerary|string|max:255',
                 'itinerary.*.description' => 'required_with:itinerary|string',
-                'map_url' => 'sometimes|nullable|url',
-                'map_iframe' => 'sometimes|nullable|string',
                 'includes' => 'sometimes|nullable|array',
                 'includes.*' => 'string|max:255',
                 'excludes' => 'sometimes|nullable|array',
@@ -157,11 +174,16 @@ class TourPackageController extends Controller
                 'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:512',
                 'deleted_images' => 'sometimes|array',
                 'deleted_images.*' => 'integer|exists:tour_package_images,id',
+                'map_images' => 'sometimes|array',
+                'map_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:512',
+                'deleted_map_images' => 'sometimes|array',
+                'deleted_map_images.*' => 'integer|exists:tour_package_map_images,id',
                 'status_id' => 'sometimes|required|in:4,5',
             ]);
 
             DB::beginTransaction();
 
+            // Handle deletion of regular images
             if (isset($validated['deleted_images'])) {
                 foreach ($validated['deleted_images'] as $did) {
                     $image = $tourPackage->images()->where('id', $did)->first();
@@ -174,16 +196,18 @@ class TourPackageController extends Controller
                 }
             }
 
+            // Ensure a main image exists for regular images
             $remainingImages = $tourPackage->images()->get();
             if ($remainingImages->count() > 0 && !$remainingImages->contains('is_main', true)) {
                 $remainingImages->first()->update(['is_main' => true]);
             }
 
+            // Handle new regular images
             if ($request->hasFile('images')) {
                 $imageFiles = $request->file('images');
                 $hasNoImages = $tourPackage->images()->count() === 0;
                 foreach ($imageFiles as $index => $imageFile) {
-                    $path = $imageFile->store('uploads/tour_packages', 'public');
+                    $path = $imageFile->store('uploads/tour_packages/images', 'public');
                     $isMain = $hasNoImages && $index === 0;
                     $tourPackage->images()->create([
                         'image_path' => $path,
@@ -192,17 +216,50 @@ class TourPackageController extends Controller
                 }
             }
 
-            unset($validated['images']);
-            unset($validated['deleted_images']);
+            // Handle deletion of map images
+            if (isset($validated['deleted_map_images'])) {
+                foreach ($validated['deleted_map_images'] as $did) {
+                    $mapImage = $tourPackage->mapImages()->where('id', $did)->first();
+                    if ($mapImage) {
+                        if (Storage::disk('public')->exists($mapImage->map_image_path)) {
+                            Storage::disk('public')->delete($mapImage->map_image_path);
+                        }
+                        $mapImage->delete();
+                    }
+                }
+            }
+
+            // Ensure a main map image exists
+            $remainingMapImages = $tourPackage->mapImages()->get();
+            if ($remainingMapImages->count() > 0 && !$remainingMapImages->contains('is_main', true)) {
+                $remainingMapImages->first()->update(['is_main' => true]);
+            }
+
+            // Handle new map images
+            if ($request->hasFile('map_images')) {
+                $mapImageFiles = $request->file('map_images');
+                $hasNoMapImages = $tourPackage->mapImages()->count() === 0;
+                foreach ($mapImageFiles as $index => $mapImageFile) {
+                    $path = $mapImageFile->store('uploads/tour_packages/map_images', 'public');
+                    $isMain = $hasNoMapImages && $index === 0;
+                    $tourPackage->mapImages()->create([
+                        'map_image_path' => $path,
+                        'is_main' => $isMain,
+                    ]);
+                }
+            }
+
+            unset($validated['images'], $validated['deleted_images'], $validated['map_images'], $validated['deleted_map_images']);
             $tourPackage->update($validated);
 
             DB::commit();
 
             return response()->json(
-                ['data' => $tourPackage->load(['destination', 'tourType', 'level', 'status', 'images'])],
+                ['data' => $tourPackage->load(['destination', 'tourType', 'level', 'status', 'images', 'mapImages'])],
                 Response::HTTP_OK
             );
         } catch (ValidationException $e) {
+            DB::rollBack();
             return response()->json(
                 ['message' => 'Validation failed.', 'errors' => $e->errors()],
                 Response::HTTP_UNPROCESSABLE_ENTITY
@@ -220,16 +277,26 @@ class TourPackageController extends Controller
     public function destroy($id)
     {
         try {
-            $tourPackage = TourPackage::with('images')->findOrFail($id);
+            $tourPackage = TourPackage::with(['images', 'mapImages'])->findOrFail($id);
 
             DB::beginTransaction();
 
+            // Delete regular images
             foreach ($tourPackage->images as $image) {
                 if (Storage::disk('public')->exists($image->image_path)) {
                     Storage::disk('public')->delete($image->image_path);
                 }
                 $image->delete();
             }
+
+            // Delete map images
+            foreach ($tourPackage->mapImages as $mapImage) {
+                if (Storage::disk('public')->exists($mapImage->map_image_path)) {
+                    Storage::disk('public')->delete($mapImage->map_image_path);
+                }
+                $mapImage->delete();
+            }
+
             $tourPackage->delete();
 
             DB::commit();

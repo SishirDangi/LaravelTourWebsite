@@ -49,7 +49,7 @@ const TestimonialSection: React.FC = () => {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className='text-7xl font-bold text-white mb-4'>What Our Trekkers Say</h2>
+          <h2 className='text-5xl font-bold text-white mb-4'>What Our Trekkers Say</h2>
           <p className='text-xl text-gray-200 max-w-2xl mx-auto'>
             Real experiences from adventurers who explored Nepal’s mountains with us
           </p>

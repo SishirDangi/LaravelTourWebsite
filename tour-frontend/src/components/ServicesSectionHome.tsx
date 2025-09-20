@@ -69,7 +69,7 @@ const ServicesSection: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className='text-7xl font-bold text-center mb-10 text-orange-700'
+          className='text-5xl font-bold text-center mb-10 text-orange-700'
         >
           Our Trekking Services
         </motion.h2>

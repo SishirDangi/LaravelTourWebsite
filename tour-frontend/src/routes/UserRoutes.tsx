@@ -15,7 +15,8 @@ import BookingForm from "../components/BookingForm";
 import PopularTour from "../components/PopularTour";
 import Home from "../components/Home";
 import ScrollToTopButton from "../components/ScrollToTopButton";
-import EnquiryNow from "../components/EnquiryNow";
+
+import PrivacyPolicy from "../components/PrivacyPolicy";
 
 
 // Lazy-loaded page component
@@ -64,7 +65,7 @@ const UserRoutes: React.FC = () => {
           <Route path="/packages/:id" element={<PackageDetails />} />
           <Route path="/booking/:id" element={<BookingForm />} />
           <Route path="/populartours" element={<PopularTour />} />
-          <Route path="/enquirynow" element={<EnquiryNow />} />
+           <Route path="/privacypolicy" element={<PrivacyPolicy />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

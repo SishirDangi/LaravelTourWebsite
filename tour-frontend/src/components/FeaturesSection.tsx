@@ -54,7 +54,7 @@ const FeaturesSection = () => {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-           <h1 className='text-7xl font-bold text-center mb-10 text-orange-700'>
+           <h1 className='text-5xl font-bold text-center mb-10 text-orange-700'>
         Why Choose Us
       </h1>
          
@@ -87,7 +87,7 @@ const FeaturesSection = () => {
 
         <div className='mt-12 flex flex-col sm:flex-row gap-4 justify-center'>
           <Link
-            to='/about'
+            to='/aboutus'
             className='bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-300 flex items-center justify-center group'
           >
             Find Out More

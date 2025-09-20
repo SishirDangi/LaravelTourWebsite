@@ -1,4 +1,3 @@
-// PackageDetails.tsx
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation, Link } from "react-router-dom";
 import {
@@ -14,10 +13,15 @@ import {
   StarIcon,
   CalendarIcon,
   InformationCircleIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
+import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
+import "yet-another-react-lightbox/plugins/thumbnails.css";
+import { useSwipeable } from "react-swipeable";
 import BookingForm from "./BookingForm";
 import Footer from "./Footer";
 
@@ -43,8 +47,8 @@ export interface TourPackage {
   card_highlights?: string[] | null;
   detailed_highlights?: string[] | null;
   itinerary?: { day: number; title?: string; description: string }[] | null;
-  map_url?: string | null;
   map_iframe?: string | null;
+  map_images?: { id: number; map_image_path: string; is_main: boolean }[] | null;
   includes?: string[] | null;
   excludes?: string[] | null;
   faqs?: { question: string; answer: string }[] | null;
@@ -76,6 +80,8 @@ const PackageDetails: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<string>("overview");
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentMapIndex, setCurrentMapIndex] = useState(0);
+  const [mapViewerOpen, setMapViewerOpen] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
   const baseUrl = apiUrl.replace("/api", "");
@@ -86,6 +92,7 @@ const PackageDetails: React.FC = () => {
         const res = await fetch(`${apiUrl}/tour-packages/${id}`);
         if (!res.ok) throw new Error("Failed to fetch tour package");
         const { data } = await res.json();
+        console.log("API Response:", data);
         setTourPackage(data);
       } catch (err) {
         setError((err as Error).message);
@@ -105,7 +112,16 @@ const PackageDetails: React.FC = () => {
     }
   }, [tourPackage]);
 
-  // Scroll to BookingForm if navigated from "Book Now"
+  useEffect(() => {
+    if (tourPackage && tourPackage.map_images) {
+      console.log("Map Images:", tourPackage.map_images);
+      const mainIdx = tourPackage.map_images.findIndex((img) => img.is_main);
+      if (mainIdx !== -1) {
+        setCurrentMapIndex(mainIdx);
+      }
+    }
+  }, [tourPackage]);
+
   useEffect(() => {
     if (!location.state?.scrollToBooking) return;
 
@@ -113,7 +129,7 @@ const PackageDetails: React.FC = () => {
       const bookingForm = document.getElementById("booking-form");
       if (bookingForm) {
         window.scrollTo({
-          top: bookingForm.offsetTop - 140, // Adjust for sticky nav
+          top: bookingForm.offsetTop - 140,
           behavior: "smooth",
         });
         console.log("Scrolled to booking form");
@@ -122,12 +138,11 @@ const PackageDetails: React.FC = () => {
       }
     };
 
-    // Use MutationObserver to detect when booking-form is added to DOM
     const observer = new MutationObserver(() => {
       const bookingForm = document.getElementById("booking-form");
       if (bookingForm) {
         scrollToForm();
-        observer.disconnect(); // Stop observing once found
+        observer.disconnect();
       }
     });
 
@@ -136,10 +151,8 @@ const PackageDetails: React.FC = () => {
       subtree: true,
     });
 
-    // Initial check in case the element is already present
     scrollToForm();
 
-    // Cleanup observer on unmount
     return () => observer.disconnect();
   }, [location.state]);
 
@@ -168,6 +181,38 @@ const PackageDetails: React.FC = () => {
     }
   };
 
+  // Swipe handlers for hero section images
+  const heroSwipeHandlers = useSwipeable({
+    onSwipedLeft: () => {
+      if (tourPackage?.images && currentIndex < tourPackage.images.length - 1) {
+        setCurrentIndex((prev) => prev + 1);
+      }
+    },
+    onSwipedRight: () => {
+      if (currentIndex > 0) {
+        setCurrentIndex((prev) => prev - 1);
+      }
+    },
+    trackMouse: true,
+    trackTouch: true,
+  });
+
+  // Swipe handlers for map section images
+  const mapSwipeHandlers = useSwipeable({
+    onSwipedLeft: () => {
+      if (tourPackage?.map_images && currentMapIndex < tourPackage.map_images.length - 1) {
+        setCurrentMapIndex((prev) => prev + 1);
+      }
+    },
+    onSwipedRight: () => {
+      if (currentMapIndex > 0) {
+        setCurrentMapIndex((prev) => prev - 1);
+      }
+    },
+    trackMouse: true,
+    trackTouch: true,
+  });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen w-screen bg-white">
@@ -189,15 +234,22 @@ const PackageDetails: React.FC = () => {
   }
 
   const images = tourPackage.images || [];
+  const mapImages = tourPackage.map_images || [];
   const currentBgUrl =
     images.length > 0
       ? `${baseUrl}/storage/${images[currentIndex].image_path}`
       : "/trekking-bg.jpg";
+  const currentMapImageUrl =
+    mapImages.length > 0
+      ? `${baseUrl}/storage/${mapImages[currentMapIndex].map_image_path}`
+      : "/default-map-image.jpg";
+
+  console.log("Current Map Image URL:", currentMapImageUrl);
 
   return (
     <div className="w-full bg-gray-50">
       {/* Hero Section */}
-      <div className="relative h-[70vh] flex items-center justify-center">
+      <div className="relative h-[70vh] flex items-center justify-center" {...heroSwipeHandlers}>
         <div
           className="absolute inset-0 bg-cover bg-center transition-all duration-500"
           style={{ backgroundImage: `url(${currentBgUrl})` }}
@@ -208,37 +260,19 @@ const PackageDetails: React.FC = () => {
         </h1>
 
         {images.length > 1 && (
-          <>
-            {currentIndex > 0 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+            {images.map((_, idx) => (
               <button
-                onClick={() => setCurrentIndex((prev) => prev - 1)}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 p-3 rounded-full text-gray-800 hover:bg-white transition shadow-md"
-              >
-                <ChevronLeftIcon className="h-6 w-6" />
-              </button>
-            )}
-            {currentIndex < images.length - 1 && (
-              <button
-                onClick={() => setCurrentIndex((prev) => prev + 1)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 p-3 rounded-full text-gray-800 hover:bg-white transition shadow-md"
-              >
-                <ChevronRightIcon className="h-6 w-6" />
-              </button>
-            )}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-              {images.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentIndex(idx)}
-                  className={`w-3 h-3 rounded-full transition ${
-                    idx === currentIndex
-                      ? "bg-orange-500"
-                      : "bg-white/50 hover:bg-white/70"
-                  }`}
-                ></button>
-              ))}
-            </div>
-          </>
+                key={idx}
+                onClick={() => setCurrentIndex(idx)}
+                className={`w-3 h-3 rounded-full transition ${
+                  idx === currentIndex
+                    ? "bg-orange-500"
+                    : "bg-white/50 hover:bg-white/70"
+                }`}
+              ></button>
+            ))}
+          </div>
         )}
       </div>
 
@@ -461,34 +495,85 @@ const PackageDetails: React.FC = () => {
         </main>
 
         {/* Sidebar */}
-        <aside className="lg:w-[350px] self-start space-y-6 sticky top-[120px]">
-          <div id="booking-form">
+        <aside className="lg:w-[350px] self-start space-y-6 sticky top-[120px] hidden lg:block">
+          <div id="booking-form-sidebar">
             <BookingForm scrollToBooking={location.state?.scrollToBooking} />
           </div>
         </aside>
       </div>
 
       {/* Map Section */}
-      {tourPackage.map_iframe && (
+      {mapImages.length > 0 ? (
         <section id="map" className="w-full py-12 scroll-mt-28">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center flex items-center justify-center gap-2">
               <MapPinIcon className="h-7 w-7 text-orange-500" />
-              Location
+              Route Map
             </h2>
-            <div className="w-full h-[60vh] overflow-hidden rounded-lg shadow-md">
-              <iframe
-                src={tourPackage.map_iframe.match(/src="([^"]+)"/)?.[1] || ""}
-                className="w-full h-full border-0"
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              ></iframe>
+
+            <div className="relative w-full max-w-[70%] mx-auto min-h-[42vh] overflow-hidden" {...mapSwipeHandlers}>
+              <img
+                src={currentMapImageUrl}
+                alt="Route Map"
+                className="w-full h-full object-contain cursor-pointer"
+                onClick={() => setMapViewerOpen(true)}
+                onError={() =>
+                  console.error("Failed to load map image:", currentMapImageUrl)
+                }
+              />
+
+              {mapImages.length > 1 && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                  {mapImages.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentMapIndex(idx)}
+                      className={`w-3 h-3 rounded-full transition ${
+                        idx === currentMapIndex
+                          ? "bg-orange-500"
+                          : "bg-white/50 hover:bg-white/70"
+                      }`}
+                    ></button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Lightbox Viewer */}
+            <Lightbox
+              open={mapViewerOpen}
+              close={() => setMapViewerOpen(false)}
+              index={currentMapIndex}
+              slides={mapImages.map((img) => ({
+                src: `${baseUrl}/storage/${img.map_image_path}`,
+              }))}
+              plugins={[Zoom, Fullscreen, Thumbnails]}
+            />
+
+            {/* Booking Form for Mobile View */}
+            <div id="booking-form" className="mt-2 block lg:hidden">
+              <BookingForm scrollToBooking={location.state?.scrollToBooking} />
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section id="map" className="w-full py-12 scroll-mt-28">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center flex items-center justify-center gap-2">
+              <MapPinIcon className="h-7 w-7 text-orange-500" />
+              Route Map
+            </h2>
+            <div className="text-center text-gray-600">
+              No map images available for this tour package.
+            </div>
+            <div id="booking-form" className="mt-2 block lg:hidden">
+              <BookingForm scrollToBooking={location.state?.scrollToBooking} />
             </div>
           </div>
         </section>
       )}
-    <Footer />
+
+      <Footer />
     </div>
   );
 };

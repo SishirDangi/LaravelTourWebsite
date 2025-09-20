@@ -56,7 +56,7 @@ const BlogPage: React.FC = () => {
   const handleBack = () => setSelectedBlog(null);
 
   return (
-    <div className="pt-16">
+    <div className="pt-0">
       {/* Header Section */}
       <section className="w-full font-sans">
         <div className="relative w-full h-[300px] md:h-[400px]">

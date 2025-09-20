@@ -15,6 +15,8 @@ class StatusSeeder extends Seeder
             ['name' => 'Available'],
             ['name' => 'Unavailable'],
             ['name' => 'Booked'],
+            ['name' => 'Active'],
+            ['name' => 'Inactive'],
         ];
 
         foreach ($statuses as $status) {

@@ -81,9 +81,9 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-indigo-100 via-blue-50 to-white px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-orange-100 via-yellow-50 to-white px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-10 border border-gray-100">
-        <h2 className="text-3xl font-extrabold mb-6 text-center text-indigo-600">
+        <h2 className="text-3xl font-extrabold mb-6 text-center text-orange-600">
           Admin Login
         </h2>
 
@@ -106,7 +106,7 @@ const Login: React.FC = () => {
               name="email"
               value={form.email}
               onChange={handleChange}
-              className="w-full px-5 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm"
+              className="w-full px-5 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition shadow-sm"
               placeholder="you@example.com"
               required
             />
@@ -129,7 +129,7 @@ const Login: React.FC = () => {
                 name="password"
                 value={form.password}
                 onChange={handleChange}
-                className="w-full px-5 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm pr-12"
+                className="w-full px-5 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition shadow-sm pr-12"
                 placeholder="********"
                 required
               />
@@ -148,7 +148,7 @@ const Login: React.FC = () => {
           {/* Submit */}
           <button
             type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg text-lg transition shadow-md hover:shadow-lg"
+            className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 rounded-lg text-lg transition shadow-md hover:shadow-lg"
           >
             Login
           </button>
@@ -156,7 +156,7 @@ const Login: React.FC = () => {
 
         <p className="mt-6 text-center text-sm text-gray-500">
           Forgot your password?{" "}
-          <a href="/forgot-password" className="text-indigo-600 hover:underline">
+          <a href="/forgot-password" className="text-orange-600 hover:underline">
             Reset here
           </a>
         </p>
