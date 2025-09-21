@@ -10,6 +10,7 @@ import NotFound from "../components/NotFound";
 import BlogPage from "../components/BlogPage";
 import About from "../components/About";
 import Destination from "../components/Destination";
+import DestinationName from "../components/DestinationName";
 import PackageDetails from "../components/PackageDetails";
 import BookingForm from "../components/BookingForm";
 import PopularTour from "../components/PopularTour";
@@ -65,7 +66,8 @@ const UserRoutes: React.FC = () => {
           <Route path="/packages/:id" element={<PackageDetails />} />
           <Route path="/booking/:id" element={<BookingForm />} />
           <Route path="/populartours" element={<PopularTour />} />
-           <Route path="/privacypolicy" element={<PrivacyPolicy />} />
+          <Route path="/privacypolicy" element={<PrivacyPolicy />} />
+          <Route path="/destination/:slug" element={<DestinationName />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
