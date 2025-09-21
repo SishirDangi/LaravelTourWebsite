@@ -7,6 +7,7 @@ import AdminTourPackage from "../pages/admin/AdminTourPackage";
 import AdminBookings from "../pages/admin/AdminBookings";
 import AdminEnquiry from "../pages/admin/AdminEnquiry";
 import AdminLiveMessage from "../pages/admin/AdminLiveMessage";
+import AdminSubscribers from "../pages/admin/AdminSubscribers";
 
 // Lazy load admin pages
 const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard"));
@@ -41,7 +42,7 @@ const AdminRoutes: React.FC = () => {
           <Route path="admintourpackages" element={<AdminTourPackage />} />
           <Route path="adminbookings" element={<AdminBookings />} />
           <Route path="adminlivemessages" element={<AdminLiveMessage />} />
-          
+          <Route path="adminsubscribers" element={<AdminSubscribers />} />
         </Route>
       </Routes>
     </Suspense>

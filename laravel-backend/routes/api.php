@@ -11,6 +11,8 @@ use App\Http\Controllers\BookTourController;
 use App\Http\Controllers\PopularTourController;
 use App\Http\Controllers\EnquiryController;
 use App\Http\Controllers\LiveMessageController;
+use App\Http\Controllers\SubscriberController;
+
 
 Route::apiResource('users', UserController::class);
 Route::post('/login', [AuthController::class, 'login']);
@@ -67,3 +69,10 @@ Route::get('/popular-tours', [PopularTourController::class, 'index']);
 Route::apiResource('enquiries', EnquiryController::class);
 
 Route::apiResource('live-messages', LiveMessageController::class);
+
+
+// Subscribers
+Route::get('/subscribers', [SubscriberController::class, 'index']);
+Route::post('/subscribers/otp', [SubscriberController::class, 'requestOTP']);
+Route::post('/subscribers/verify', [SubscriberController::class, 'verifyOTP']);
+Route::delete('/subscribers/{id}', [SubscriberController::class, 'destroy']);

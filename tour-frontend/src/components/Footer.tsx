@@ -65,7 +65,7 @@ const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
         {/* Column 1: Useful Links */}
         <div className="flex flex-col items-center md:items-start space-y-6">
-          <h2 className="text-2xl font-bold tracking-tight text-orange-700">
+          <h2 className="text-2xl font-bold tracking-tight text-orange-500">
             Useful Links
           </h2>
           <ul className="space-y-3 text-gray-300">
@@ -80,9 +80,9 @@ const Footer: React.FC = () => {
               <li key={label}>
                 <Link
                   to={to}
-                  className="group flex items-center gap-2 text-base font-medium hover:text-orange-700 transition-all duration-300 ease-in-out transform hover:translate-x-2"
+                  className="group flex items-center gap-2 text-base font-medium hover:text-orange-500 transition-all duration-300 ease-in-out transform hover:translate-x-2"
                 >
-                  <FaAngleRight className="text-orange-700 group-hover:text-orange-600 transition-colors duration-300" />
+                  <FaAngleRight className="text-orange-500 group-hover:text-orange-400 transition-colors duration-300" />
                   {label}
                 </Link>
               </li>
@@ -92,7 +92,7 @@ const Footer: React.FC = () => {
 
         {/* Column 2: Popular Tours */}
         <div className="flex flex-col items-center md:items-start space-y-6">
-          <h2 className="text-2xl font-bold tracking-tight text-orange-700">
+          <h2 className="text-2xl font-bold tracking-tight text-orange-500">
             Popular Tours
           </h2>
           <ul className="space-y-3 text-gray-300">
@@ -106,9 +106,9 @@ const Footer: React.FC = () => {
                   <li key={tour.id}>
                     <Link
                       to={`/packages/${tour.tour_package.id}`}
-                      className="group flex items-center gap-2 text-base font-medium hover:text-orange-700 transition-all duration-300 ease-in-out transform hover:translate-x-2"
+                      className="group flex items-center gap-2 text-base font-medium hover:text-orange-500 transition-all duration-300 ease-in-out transform hover:translate-x-2"
                     >
-                      <FaAngleRight className="text-orange-700 group-hover:text-orange-600 transition-colors duration-300" />
+                      <FaAngleRight className="text-orange-500 group-hover:text-orange-400 transition-colors duration-300" />
                       {tour.tour_package.name}
                     </Link>
                   </li>
@@ -131,28 +131,28 @@ const Footer: React.FC = () => {
             <h2 className="text-4xl font-extrabold tracking-wider text-white font-['Winky_Rough',sans-serif]">
               HIMALAYA
             </h2>
-            <p className="text-2xl tracking-wider font-medium text-orange-700 font-['Winky_Rough',sans-serif]">
+            <p className="text-2xl tracking-wider font-medium text-orange-500 font-['Winky_Rough',sans-serif]">
               TREKKING
             </p>
           </div>
           <div className="space-y-2">
-            <p className="text-xl font-bold text-orange-700 tracking-tight">
+            <p className="text-xl font-bold text-orange-500 tracking-tight">
               Location
             </p>
             <p className="text-base text-gray-300">Thamel, Kathmandu, Nepal</p>
           </div>
           <div className="space-y-2">
-            <p className="text-xl font-bold text-orange-700 tracking-tight">
+            <p className="text-xl font-bold text-orange-500 tracking-tight">
               Get in Touch
             </p>
             <p className="text-base text-gray-300">
-              <a href="tel:+97714123456" className="hover:text-orange-700 transition-colors duration-300">
+              <a href="tel:+97714123456" className="hover:text-orange-500 transition-colors duration-300">
                 +977-1-4123456
               </a>
             </p>
             <a
               href="mailto:info@himalayatrekking.com"
-              className="text-base text-gray-300 hover:text-orange-700 transition-colors duration-300"
+              className="text-base text-gray-300 hover:text-orange-500 transition-colors duration-300"
             >
               info@himalayatrekking.com
             </a>
@@ -161,7 +161,7 @@ const Footer: React.FC = () => {
 
         {/* Column 4: Subscribe and Socials */}
         <div className="flex flex-col items-center md:items-start space-y-6">
-          <h2 className="text-2xl font-bold tracking-tight text-orange-700">
+          <h2 className="text-2xl font-bold tracking-tight text-orange-500">
             Stay Connected
           </h2>
           <p className="text-base text-gray-300">
@@ -171,7 +171,7 @@ const Footer: React.FC = () => {
             <SubscribeForm />
           </div>
           <div className="space-y-3">
-            <h3 className="text-xl font-bold text-orange-700 tracking-tight">
+            <h3 className="text-xl font-bold text-orange-500 tracking-tight">
               Follow Us
             </h3>
             <div className="flex space-x-6 text-2xl justify-center md:justify-start">
@@ -179,7 +179,7 @@ const Footer: React.FC = () => {
                 href="https://www.facebook.com/himalayatrekking"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="transition-all duration-300 hover:text-orange-700 hover:scale-110"
+                className="transition-all duration-300 hover:text-orange-500 hover:scale-110"
               >
                 <FaFacebookF />
               </a>
@@ -187,7 +187,7 @@ const Footer: React.FC = () => {
                 href="https://www.instagram.com/himalayatrekking"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="transition-all duration-300 hover:text-orange-700 hover:scale-110"
+                className="transition-all duration-300 hover:text-orange-500 hover:scale-110"
               >
                 <FaInstagram />
               </a>
@@ -195,7 +195,7 @@ const Footer: React.FC = () => {
                 href="https://www.tiktok.com/@himalayatrekking"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="transition-all duration-300 hover:text-orange-700 hover:scale-110"
+                className="transition-all duration-300 hover:text-orange-500 hover:scale-110"
               >
                 <SiTiktok />
               </a>
@@ -214,19 +214,19 @@ const Footer: React.FC = () => {
           <div className="flex space-x-6">
             <Link
               to="/terms"
-              className="hover:text-orange-700 transition-all duration-300"
+              className="hover:text-orange-500 transition-all duration-300"
             >
               Terms & Conditions
             </Link>
             <Link
               to="/privacypolicy"
-              className="hover:text-orange-700 transition-all duration-300"
+              className="hover:text-orange-500 transition-all duration-300"
             >
               Privacy Policy
             </Link>
             <Link
               to="/faqs"
-              className="hover:text-orange-700 transition-all duration-300"
+              className="hover:text-orange-500 transition-all duration-300"
             >
               FAQ
             </Link>

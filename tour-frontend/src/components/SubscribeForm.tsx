@@ -195,7 +195,7 @@ const SubscribeForm: React.FC = () => {
             setEmail(e.target.value)
           }
           required
-          className="px-4 py-3 text-white bg-transparent placeholder-white border border-[#B8860B] rounded-lg w-full text-base text-center md:text-left focus:outline-none focus:border-[#661F1F] focus:ring-1 focus:ring-[#661F1F] transition duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="px-4 py-3 text-white bg-transparent placeholder-white border border-orange-500 rounded-lg w-full text-base text-center md:text-left focus:outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600 transition duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
         />
         {isOtpSent && (
           <input
@@ -207,7 +207,7 @@ const SubscribeForm: React.FC = () => {
               setOtp(e.target.value)
             }
             required
-            className="px-4 py-3 text-white bg-transparent placeholder-white border border-[#B8860B] rounded-lg w-full text-base text-center md:text-left focus:outline-none focus:border-[#661F1F] focus:ring-1 focus:ring-[#661F1F] transition duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="px-4 py-3 text-white bg-transparent placeholder-white border border-orange-500 rounded-lg w-full text-base text-center md:text-left focus:outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600 transition duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
           />
         )}
         {error && (
@@ -226,8 +226,8 @@ const SubscribeForm: React.FC = () => {
           className="
             relative 
             overflow-hidden 
-            bg-[#661F1F] 
-            hover:bg-[#A44A3F] 
+            bg-orange-500 
+            hover:bg-orange-600 
             text-white 
             px-10 py-3 
             rounded-full 
@@ -285,8 +285,8 @@ const SubscribeForm: React.FC = () => {
             className="
               relative 
               overflow-hidden 
-              bg-[#B8860B] 
-              hover:bg-[#D4A017] 
+              bg-orange-500 
+              hover:bg-orange-600 
               text-white 
               px-10 py-3 
               rounded-full 

@@ -11,6 +11,8 @@ import {
   FaQuestionCircle,
   FaCalendarCheck,
   FaSuitcase,
+  FaUsers,
+  FaComment,
 } from "react-icons/fa";
 
 interface AdminSidebarProps {
@@ -73,7 +75,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     { label: "Enquiry", icon: <FaQuestionCircle />, path: "/admin-dashboard/adminenquiry" },
     { label: "Tour Bookings", icon: <FaCalendarCheck />, path: "/admin-dashboard/adminbookings" },
     { label: "Tour Package", icon: <FaSuitcase />, path: "/admin-dashboard/admintourpackages" },
-     { label: "Live Messages", icon: <FaSuitcase />, path: "/admin-dashboard/adminlivemessages" },
+    { label: "Live Messages", icon: <FaComment />, path: "/admin-dashboard/adminlivemessages" },
+    { label: "Subscribers", icon: <FaUsers />, path: "/admin-dashboard/adminsubscribers" },
   ];
 
   return (
