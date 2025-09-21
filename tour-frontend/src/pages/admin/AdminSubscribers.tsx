@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { FaChevronDown, FaSearch, FaCopy, FaTrash, FaSpinner, FaTimes, } from "react-icons/fa";
+import { FaChevronDown, FaSearch, FaCopy, FaTrash, FaSpinner, FaTimes } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -354,20 +354,42 @@ const AdminSubscribers = (): React.ReactElement => {
         </div>
         <div className="px-6 py-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Search Input with Search Icon */}
-            <div className="relative w-full">
-              <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Search by email"
-                value={searchTerm}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setSearchTerm(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors disabled:opacity-50"
-                disabled={submitting}
-              />
+            {/* Search Input with Search Icon - FIXED */}
+            <div className="w-full">
+              <label htmlFor="searchInput" className="block mb-1 font-semibold text-gray-700">
+                Search Email
+              </label>
+              <div className="relative">
+                <FaSearch 
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" 
+                  size={16}
+                />
+                <input
+                  id="searchInput"
+                  type="text"
+                  placeholder="Search by email..."
+                  value={searchTerm}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors disabled:opacity-50"
+                  disabled={submitting}
+                />
+                {searchTerm && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchTerm("");
+                      setCurrentPage(1);
+                    }}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    disabled={submitting}
+                  >
+                    <FaTimes size={12} />
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* From Date */}
